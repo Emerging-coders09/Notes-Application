@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 const Login = () => {
+  const navigate = useNavigate()
   const [values , setValues] = useState({
     email : '',
     password : ''
@@ -12,11 +13,15 @@ const Login = () => {
       email : values.email , 
       password : values.password
     })
-    console.log(data)
+    if(data) {
+      // localStorage.setItem('user', JSON.stringify(data.user))
+      alert("Logged In successfully")
+      // navigate('/notes')
+    } 
+      
 
   }
 
-  const navigate = useNavigate()
   return (
     <div className="w-full h-screen flex items-center justify-center bg-gray-100">
       

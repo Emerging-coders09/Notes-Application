@@ -1,9 +1,15 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
 
 const Notes = () => {
+  const navigate = useNavigate()
 
 
-  
+  const handleLogOut = ()=>{
+    alert("LoggedOut successfully")
+    navigate('/')
+  }
+
   return (
     <div className="w-full h-screen flex bg-gray-100">
 
@@ -18,6 +24,10 @@ const Notes = () => {
           <p className="cursor-pointer hover:text-black">All Notes</p>
           <p className="cursor-pointer hover:text-black">Favorites</p>
         </div>
+
+        <button className="mt-auto bg-red-400 text-white py-2 rounded-lg hover:bg-red-600 transition cursor-pointer" onClick={handleLogOut}>
+          Log Out
+        </button>
       </div>
 
       <div className="flex-1 p-6 flex flex-col gap-6">
