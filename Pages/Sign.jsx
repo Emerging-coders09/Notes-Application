@@ -1,7 +1,9 @@
 import React, { useState } from 'react'
-import { Navigate, useNavigate } from 'react-router-dom'
+import toast from 'react-hot-toast'
+import { useNavigate } from 'react-router-dom'
 
 const Sign = () => {
+    const navigate = useNavigate()
     const [values , setValues] = useState({
         name : '',
         email : '',
@@ -10,22 +12,30 @@ const Sign = () => {
     })
 
     const handleRegister = async ()=>{
+      try {
         if (values.password !== values.confirmPassword) return alert("Passowrd and Confirm Password doesn't match")
 
-        await window.api.register({
+        const register = await window.api.register({
             name : values.name,
             email : values.email,
             password : values.password
         })    
-        Loadnotes()
+
+        console.log(register)
+
+        if(register.success){
+          console.log("User Added", register.data)
+          toast.success("Register Successfully")
+          navigate('/')
+        }else {
+          console.error("Error :" , register.error)
+          toast.error(register.error)
+        }
+      } catch (error) {
+        console.error(error)
+      }
     }
 
-    const Loadnotes = async ()=>{
-        const users = window.api.login({email : values.email , password : values.password})
-        console.log(users)
-    }
-
-    const navigate = useNavigate()
   return (
     <div className="w-full h-screen flex items-center justify-center bg-gray-100">
       

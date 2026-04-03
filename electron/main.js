@@ -1,13 +1,12 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'path'
 import { fileURLToPath } from 'url';
-import sqlite3 from 'sqlite3'
-import { resolve } from 'dns';
+import Database from 'better-sqlite3'
 let win
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
-const dbpath = path.join(__dirname , 'notes.db')
+// const dbpath = path.join(__dirname , 'notes.db')
 
 
 
@@ -25,17 +24,14 @@ const createWindow = ()=>{
     if(process.env.VITE_SERVER){
         win.loadURL(process.env.VITE_SERVER)
     }else{
-        
         win.loadURL(`file://${path.join(__dirname, '../dist/index.html')}`)
     }
     
 }
-const db = new sqlite3.Database(dbpath , (err)=>{
-    if(err) console.log(err)
-    else console.log('Connected to the DB')    
-})
+const db = new Database('notes.db' )
+db.pragma('journal_mode = WAL')
 
-db.run(
+db.exec(
     `
     CREATE TABLE IF NOT EXISTS Notes (
     id INTEGER ,
@@ -46,7 +42,7 @@ db.run(
     )
     `
 )
-db.run(
+db.exec(
     `
     CREATE TABLE IF NOT EXISTS users (
     id INTEGER ,
@@ -59,51 +55,133 @@ db.run(
 )
 
 ipcMain.handle('register', async (event , user)=>{
-    return new Promise((resolve , reject)=>{
-        db.run(
-            `INSERT INTO users (name , email , password) VALUES (? , ? , ?)`,
-            [user.name , user.email , user.password],
-            function(err){
-                if(err) reject(err)
-                else resolve ({ id : this.lastID})
-            }
-        )
-    })
+
+    try {
+        const query = `INSERT INTO users (name , email , password) VALUES (?,?,?)`
+        const insert = db.prepare(query).run(user.name , user.email , user.password)
+        console.log(insert)
+
+        return  {
+            success : true ,
+            data : insert
+        }
+    } catch (error) {
+        return {
+            success : false ,
+            error : error.message
+        }
+    }
+
 })
 
 ipcMain.handle('login', async(event , user)=>{
-    return new Promise((resolve , reject)=>{
-        db.get(
-            `SELECT * FROM users WHERE email = ? AND password = ?`,
-            [user.email , user.password],
-            (err , row)=>{
-                if(err) reject(err)
-                else resolve (row)    
-            }
-        )
-    })
+    try {
+        
+        const query = `SELECT * FROM users WHERE email = ? AND password = ?`
+        const data = db.prepare(query).get(user.email , user.password)
+        console.log(data)
+        return {
+            success : true ,
+            data : data
+        }
+    } catch (error) {
+        console.error(error)
+        return {
+            success : false ,
+            error : error.message
+        }
+    }
 })
 
 ipcMain.handle('add-note',async (event ,note)=>{
-    return new Promise((resolve , reject)=>{
-        db.run(
-            `INSERT INTO Notes (user_id,title , content) VALUES (?, ? , ?)`,
-            [note.userId,note.title, note.content],
-            function (err){
-                if (err) reject(err)
-                else resolve ({ id : this.lastID })
+    try {
+        // console.log(note.user_id)
+            const query = 'INSERT INTO notes (user_id , title , content) VALUES (?,?,?)'
+            const insert = db.prepare(query).run(note.user_id,note.title, note.content)
+    
+            console.log(insert)
+            return {
+                success :true ,
+                data : insert
             }
-        )
-    })
+        
+    } catch (error) {
+        return {
+            success : false ,
+            error : error.message
+        }
+    }
 })
 
-ipcMain.handle('get-notes', async (event , userId)=>{
-    return new Promise((resolve , reject)=>{
-        db.all(`SELECT * FROM Notes WHERE id = ?`, [userId], (err, rows)=>{
-            if(err) reject(err)
-            else resolve(rows)
-        })
-    })
+ipcMain.handle('get-notes', async (event , user)=>{
+    try {
+        const query = `SELECT * FROM notes WHERE user_id = ?`
+        const getdata = db.prepare(query).all(user.user_id)
+
+        console.log(getdata)
+        return {
+            success : true,
+            data : getdata
+        }
+    } catch (error) {
+        return {
+            success : false ,
+            error : error.message
+        }
+    }
+})
+
+ipcMain.handle('delete-note', async (event , note)=>{
+    try {
+        const query = `DELETE FROM notes WHERE id = ?`
+        const deleteNote = db.prepare(query).run(note.id)
+        console.log(deleteNote)
+        return {
+            success : true,
+            data : deleteNote
+        }
+    } catch (error) {
+        return {
+            success : false ,
+            error : error.message
+        }
+    }
+})
+
+ipcMain.handle('edit-note', async (event , note)=>{
+    try {
+        const query = `UPDATE Notes SET title = ? , content = ? WHERE id = ?`
+        const updateNote = db.prepare(query).run(note.title , note.content , note.id)
+
+        console.log(updateNote)
+        return {
+            success : true,
+            data : updateNote
+        }
+    } catch (error) {
+        return {
+            success : false ,
+            error : error.message
+        }
+    }
+})
+
+ipcMain.handle('getnotebyid', async (event , id)=>{
+    try {
+        const query = `SELECT * FROM Notes WHERE id = ?`
+        const getbyid = db.prepare(query).get(id.id)
+
+        console.log(getbyid)
+        return {
+            success : true ,
+            data : getbyid
+        }
+    } catch (error) {
+        return {
+            success : false ,
+            error  : error.message
+        }
+    }
 })
 
 app.whenReady().then(()=>{
