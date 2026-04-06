@@ -38,6 +38,7 @@ db.exec(
     user_id INTEGER,
     title TEXT,
     content TEXT,
+    like INTEGER,
     PRIMARY KEY("id" AUTOINCREMENT)
     )
     `
@@ -176,6 +177,25 @@ ipcMain.handle('getnotebyid', async (event , id)=>{
             success : true ,
             data : getbyid
         }
+    } catch (error) {
+        return {
+            success : false ,
+            error  : error.message
+        }
+    }
+})
+
+ipcMain.handle('favourite-note' , async (event , like)=>{
+    try {
+        const query = `UPDATE Notes SET like = 1 WHERE user_id = ? AND id = ?`
+        const favourite = db.prepare(query).run(like.user_id , like.id)
+
+        console.log(favourite)
+        return {
+            success : true ,
+            data : favourite
+        }
+
     } catch (error) {
         return {
             success : false ,

@@ -7,5 +7,6 @@ contextBridge.exposeInMainWorld('api', {
     getNotes : (id)=> ipcRenderer.invoke('get-notes', id),
     deleteNote : (id)=> ipcRenderer.invoke('delete-note' , id),
     editNote : (note)=> ipcRenderer.invoke('edit-note', note),
-    getNotebyid : (id)=> ipcRenderer.invoke('getnotebyid', id)
+    getNotebyid : (id)=> ipcRenderer.invoke('getnotebyid', id),
+    favourite : (like)=> ipcRenderer.invoke('favourite-note' , like)
 })

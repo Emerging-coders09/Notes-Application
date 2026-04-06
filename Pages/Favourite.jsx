@@ -3,11 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { Pencil, Star, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
 
-const Notes = () => {
+const Favourite = () => {
+  const navigate = useNavigate();
   const [search, setSearch] = useState(null);
   const [data, setData] = useState([]);
   const [filterdata, setFilterdata] = useState([]);
-  const navigate = useNavigate();
   let [user, setUser] = useState(null);
 
   useEffect(() => {
@@ -24,21 +24,6 @@ const Notes = () => {
     fetchData();
   }, [user]);
 
-  useEffect(() => {
-    console.log("Updated data:", data);
-    console.log("User : ", user);
-  }, [data, user]);
-
-  useEffect(() => {
-    if (!search) null;
-    const filterData = data.filter(
-      (note) =>
-        note.title.toLowerCase().includes(search.toLowerCase()) ||
-        note.content.toLowerCase().includes(search.toLowerCase()),
-    );
-    setFilterdata(filterData);
-  }, [search]);
-
   const handleDelete = async (id) => {
     const isConfirmed = confirm("Want to delete this note?");
 
@@ -51,27 +36,22 @@ const Notes = () => {
         toast("Note delete..");
         setData(data.filter((note) => note.id !== id));
       } else {
-        toast.error(del.error);
+        console.log(del.error);
       }
     } catch (error) {
-      toast.error(error);
+      console.error(error);
     }
   };
 
-  const handleFavourite = async (user_id , id)=>{
-    try {
-      const favourite = await window.api.favourite({ user_id : user_id , id : id})
-
-      if(favourite.success){
-        toast.success("Notes Added to favourite")
-      }
-      else{
-        toast.error(favourite.error)
-      }
-    } catch (error) {
-      toast.error(error);
-    }
-  }
+  useEffect(() => {
+    if (!search) null;
+    const filterData = data.filter(
+      (note) =>
+        note.title.toLowerCase().includes(search.toLowerCase()) ||
+        note.content.toLowerCase().includes(search.toLowerCase()),
+    );
+    setFilterdata(filterData);
+  }, [search]);
 
   const handleLogOut = () => {
     localStorage.removeItem("user");
@@ -99,13 +79,13 @@ const Notes = () => {
         </button>
 
         <div className="text-sm mt-6 space-y-2 flex flex-col items-start">
-          <button className="cursor-pointer bg-blue-100 text-blue-600 px-3 py-2 rounded-lg w-full outline-none">
+          <button
+            className="cursor-pointer hover:bg-gray-100  px-3 py-2 rounded-lg w-full outline-none"
+            onClick={() => navigate("/notes")}
+          >
             All Notes
           </button>
-          <button
-            className="cursor-pointer hover:bg-gray-100 px-3 py-2 rounded-lg w-full outline-none"
-            onClick={() => navigate("/favourite")}
-          >
+          <button className="cursor-pointer  text-blue-600 bg-blue-100 px-3 py-2 rounded-lg w-full outline-none">
             Favorites
           </button>
         </div>
@@ -117,10 +97,11 @@ const Notes = () => {
           Log Out
         </button>
       </div>
-
       <div className="flex-1 p-6 flex flex-col gap-6 overflow-auto">
         <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-semibold text-gray-800">Welcome 👋</h2>
+          <h2 className="text-2xl font-semibold text-gray-800">
+            Favourite Notes 👋
+          </h2>
 
           <input
             type="text"
@@ -149,7 +130,7 @@ const Notes = () => {
                   >
                     <Pencil size={16} />
                   </button>
-                  <button className=" text-black p-2 rounded-md  cursor-pointer" onClick={()=> handleFavourite(note.user_id , note.id)}>
+                  <button className=" text-black p-2 rounded-md  cursor-pointer">
                     <Star size={18} fill="yellow" />
                   </button>
 
@@ -177,4 +158,4 @@ const Notes = () => {
   );
 };
 
-export default Notes;
+export default Favourite;
