@@ -8,5 +8,8 @@ contextBridge.exposeInMainWorld('api', {
     deleteNote : (id)=> ipcRenderer.invoke('delete-note' , id),
     editNote : (note)=> ipcRenderer.invoke('edit-note', note),
     getNotebyid : (id)=> ipcRenderer.invoke('getnotebyid', id),
-    favourite : (like)=> ipcRenderer.invoke('favourite-note' , like)
+    favourite : (like)=> ipcRenderer.invoke('favourite-note' , like),
+    getfavourite : (like) => ipcRenderer.invoke('get-favourites' , like),
+    unfavourite : (like) => ipcRenderer.invoke('unfavourite' , like),
+    deleteMultiple : (ids) => ipcRenderer.invoke('delete-multiple', ids)
 })

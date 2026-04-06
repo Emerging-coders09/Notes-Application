@@ -73,7 +73,7 @@ const Add = () => {
 
             <button
               onClick={handleSave}
-              className="flex items-center gap-2 bg-blue-500 text-white px-5 py-2 rounded-xl hover:bg-blue-600 transition shadow-md hover:shadow-lg"
+              className="flex items-center gap-2 bg-blue-500 text-white px-5 py-2 rounded-xl hover:bg-blue-600 transition shadow-md hover:shadow-lg cursor-pointer"
             >
               <Save size={16} />
               Save Note
