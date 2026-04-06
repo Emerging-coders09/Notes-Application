@@ -35,6 +35,10 @@ const Update = () => {
 
 
   const handleSave = async ()=>{
+    if(values.title === '' || values.content === ''){
+      return toast.error("Enter both fields")
+    }
+    
     try {
       const updatedata = await window.api.editNote({title : values.title , content : values.content , id : id})
 

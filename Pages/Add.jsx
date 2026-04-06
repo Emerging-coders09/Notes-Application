@@ -9,6 +9,9 @@ const Add = () => {
   const [content , setContent] = useState("")
   
   const handleSave = async ()=>{
+    if(title === '' || content === ''){
+      return toast.error("Enter both fields")
+    }
     try {
       const user = JSON.parse(localStorage.getItem("user"))
       const addata = await window.api.addNote({

@@ -13,7 +13,7 @@ const Sign = () => {
 
     const handleRegister = async ()=>{
       try {
-        if (values.password !== values.confirmPassword) return alert("Passowrd and Confirm Password doesn't match")
+        if (values.password !== values.confirmPassword) return toast.error("Passowrd and Confirm Password doesn't match")
 
         const register = await window.api.register({
             name : values.name,
