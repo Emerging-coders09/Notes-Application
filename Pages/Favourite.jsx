@@ -1,15 +1,18 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { CircleX, Pencil, Star, Trash2 } from "lucide-react";
+import { CircleX, Pencil, Recycle, Star, Trash, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
 
 const Favourite = () => {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
+  const [sort, setSort] = useState(null);
   const [data, setData] = useState([]);
   let [user, setUser] = useState(null);
   const [edit, setEdit] = useState(true);
   const [selectedNotes, setSelectedNotes] = useState([]);
+   const [showConfirm, setShowConfirm] = useState(false);
+    const [deleteid, setDeleteid] = useState(null);
 
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("user"));
@@ -25,31 +28,52 @@ const Favourite = () => {
     fetchData();
   }, [user]);
 
-  const handleDelete = async (id) => {
-    const isConfirmed = confirm("Want to delete this note?");
-
-    if (!isConfirmed) return;
-
+   const handleDelete = (id) => {
+    setDeleteid(id);
+    setShowConfirm(true);
+  };
+  const handleConfirmDelete = async () => {
     try {
-      const del = await window.api.deleteNote({ id: id });
+      const del = await window.api.deleteNote({ id: deleteid });
 
       if (del.success) {
         toast.success("Note delete..");
-        setData(data.filter((note) => note.id !== id));
+        setData((prev) => prev.filter((note) => note.id !== deleteid));
       } else {
-        console.log(del.error);
+        toast.error(del.error);
       }
     } catch (error) {
-      console.error(error);
+      toast.error(error);
     }
+    setShowConfirm(false);
+    setDeleteid(null);
   };
-  const filterData = search.trim()
-    ? data.filter(
-        (note) =>
-          note.title.toLowerCase().includes(search.toLowerCase()) ||
-          note.content.toLowerCase().includes(search.toLowerCase()),
-      )
-    : data;
+  const filteredData = useMemo(() => {
+    let filterData = search.trim()
+      ? data.filter(
+          (note) =>
+            note.title.toLowerCase().includes(search.toLowerCase()) ||
+            note.content.toLowerCase().includes(search.toLowerCase()),
+        )
+      : data;
+
+    switch (sort) {
+      case "Sorting":
+        return filterData;
+
+      case "Ascending":
+        return [...filterData].sort((a, b) => a.title.localeCompare(b.title));
+
+      case "Descending":
+        return [...filterData].sort((a, b) => b.title.localeCompare(a.title));
+
+      case "Newest":
+        return [...filterData].sort((a, b) => b.id - a.id);
+
+      default:
+        return filterData;
+    }
+  }, [search, data, sort]);
 
   const handleFavourite = async (user_id, id) => {
     try {
@@ -68,7 +92,7 @@ const Favourite = () => {
     }
   };
 
-    const toggleSelect = (id) => {
+  const toggleSelect = (id) => {
     setSelectedNotes((prev) =>
       prev.includes(id)
         ? prev.filter((noteid) => noteid !== id)
@@ -76,10 +100,7 @@ const Favourite = () => {
     );
   };
 
-
   const multipleDelete = async () => {
-    
-
     try {
       const res = await window.api.deleteMultiple(selectedNotes);
 
@@ -100,10 +121,33 @@ const Favourite = () => {
     console.log(selectedNotes);
   };
 
+   const handleRecycle = async ()=>{
+    try {
+      const res = await window.api.recyclebin({ id : deleteid})
+      await window.api.unfavourite({
+        user_id: user.id,
+        id: deleteid,
+      });
+      if(res.success){
+        toast.success("Moved to Recycled Bin")
+        const notes = await window.api.getfavourite({ user_id: user.id });
+        setData(notes?.data || [])
+      }
+
+    } catch (error) {
+      toast.error(res.error)
+    }
+
+    setShowConfirm(false);
+    setDeleteid(null);
+
+  }
+
   const handleLogOut = () => {
     localStorage.removeItem("user");
     toast.success("LoggedOut successfully");
     navigate("/");
+    
   };
 
   return (
@@ -132,8 +176,14 @@ const Favourite = () => {
           >
             All Notes
           </button>
-          <button className="cursor-pointer  text-blue-600 bg-blue-100 px-3 py-2 rounded-lg w-full outline-none">
+          <button className="cursor-pointer  text-pink-600 bg-pink-100 px-3 py-2 rounded-lg w-full outline-none">
             Favorites
+          </button>
+          <button
+            className="cursor-pointer hover:bg-green-200 px-3 py-2 rounded-lg w-full outline-none text-black-600"
+            onClick={() => navigate("/recycle")}
+          >
+            Recycle Bin
           </button>
         </div>
 
@@ -151,15 +201,36 @@ const Favourite = () => {
           </h2>
           <div className="flex gap-2">
             {edit ? (
-              <button
-                className="bg-blue-500 hover:bg-blue-600 p-3 rounded-md cursor-pointer"
-                onClick={() => {
-                  setEdit(false);
-                  setSelectedNotes([]);
-                }}
-              >
-                <Pencil size={20} stroke="white" />
-              </button>
+              <div className="flex gap-3 justify-center items-center">
+                <button
+                  className="bg-blue-500 hover:bg-blue-600 p-3 rounded-md cursor-pointer"
+                  onClick={() => {
+                    setEdit(false);
+                    setSelectedNotes([]);
+                  }}
+                >
+                  <Pencil size={20} stroke="white" />
+                </button>
+                <div className="relative">
+                  <select
+                    value={sort}
+                    onChange={(e) => setSort(e.target.value)}
+                    className="appearance-none bg-white border border-gray-300 text-gray-700 px-4 py-2 pr-10 rounded-xl shadow-sm 
+    focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 
+    hover:border-gray-400 transition cursor-pointer"
+                  >
+                    <option value="Sorting">Sort By</option>
+                    <option value="Ascending">Ascending</option>
+                    <option value="Descending">Descending</option>
+                    <option value="Newest">Newest</option>
+                  </select>
+
+                  {/* Custom Arrow */}
+                  <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500">
+                    ▼
+                  </div>
+                </div>
+              </div>
             ) : (
               <div className="flex gap-3">
                 <button
@@ -185,14 +256,14 @@ const Favourite = () => {
           </div>
         </div>
 
-        {filterData.length === 0 ? (
+        {filteredData.length === 0 ? (
           <div className="flex flex-col items-center justify-center text-gray-400 mt-20">
             <p className="text-lg">No notes yet</p>
             <p className="text-sm">Start by adding a new note</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {filterData.map((note) => (
+            {filteredData.map((note) => (
               <div
                 key={note.id}
                 onClick={() => !edit && toggleSelect(note.id)}
@@ -247,6 +318,38 @@ const Favourite = () => {
           </div>
         )}
       </div>
+      {showConfirm && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-xl shadow-xl w-[300px] text-center">
+            <h3 className="text-lg font-semibold mb-3">Delete this note?</h3>
+            <p className="text-sm text-gray-500 mb-5">
+              This action cannot be undone.
+            </p>
+
+            <div className="flex justify-center gap-3">
+              <button
+                onClick={() => setShowConfirm(false)}
+                className="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300"
+              >
+                <CircleX/>
+              </button>
+
+              <button
+                onClick={handleConfirmDelete}
+                className="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600"
+              >
+                <Trash /> 
+              </button>
+              <button
+                onClick={handleRecycle}
+                className="px-5 py-2 rounded-lg bg-green-500 text-white hover:bg-green-600"
+              >
+                <Recycle /> 
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

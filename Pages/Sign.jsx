@@ -15,6 +15,11 @@ const Sign = () => {
       try {
         if (values.password !== values.confirmPassword) return toast.error("Passowrd and Confirm Password doesn't match")
 
+         const user = await window.api.getuser({email : values.email}) 
+         if(user.data){
+          return toast.error("User Already Exists")
+         }
+         
         const register = await window.api.register({
             name : values.name,
             email : values.email,

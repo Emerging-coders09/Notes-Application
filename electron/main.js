@@ -6,7 +6,6 @@ let win;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-// const dbpath = path.join(__dirname , 'notes.db')
 
 const createWindow = () => {
   win = new BrowserWindow({
@@ -35,6 +34,7 @@ db.exec(
     title TEXT,
     content TEXT,
     like INTEGER,
+    recycle TEXT,
     PRIMARY KEY("id" AUTOINCREMENT)
     )
     `,
@@ -55,7 +55,6 @@ ipcMain.handle("register", async (event, user) => {
   try {
     const query = `INSERT INTO users (name , email , password) VALUES (?,?,?)`;
     const insert = db.prepare(query).run(user.name, user.email, user.password);
-    console.log(insert);
 
     return {
       success: true,
@@ -69,11 +68,28 @@ ipcMain.handle("register", async (event, user) => {
   }
 });
 
+ipcMain.handle('get-users' , async (event , user)=>{
+  try {
+    const query = `SELECT * FROM users WHERE email = ?`
+    const User = db.prepare(query).get(user.email)
+
+    console.log(User)
+    return {
+      success : true,
+      data : User
+    }
+  } catch (error) {
+      return {
+        success : false ,
+        error : error.message
+      }
+  }
+})
+
 ipcMain.handle("login", async (event, user) => {
   try {
     const query = `SELECT * FROM users WHERE email = ? AND password = ?`;
     const data = db.prepare(query).get(user.email, user.password);
-    console.log(data);
     return {
       success: true,
       data: data,
@@ -95,7 +111,6 @@ ipcMain.handle("add-note", async (event, note) => {
       .prepare(query)
       .run(note.user_id, note.title, note.content);
 
-    console.log(insert);
     return {
       success: true,
       data: insert,
@@ -110,10 +125,8 @@ ipcMain.handle("add-note", async (event, note) => {
 
 ipcMain.handle("get-notes", async (event, user) => {
   try {
-    const query = `SELECT * FROM notes WHERE user_id = ?`;
+    const query = `SELECT * FROM notes WHERE user_id = ? AND (recycle != 'bin' OR recycle IS NULL);`;
     const getdata = db.prepare(query).all(user.user_id);
-
-    console.log(getdata);
     return {
       success: true,
       data: getdata,
@@ -130,7 +143,6 @@ ipcMain.handle("delete-note", async (event, note) => {
   try {
     const query = `DELETE FROM notes WHERE id = ?`;
     const deleteNote = db.prepare(query).run(note.id);
-    console.log(deleteNote);
     return {
       success: true,
       data: deleteNote,
@@ -148,7 +160,6 @@ ipcMain.handle("edit-note", async (event, note) => {
     const query = `UPDATE Notes SET title = ? , content = ? WHERE id = ?`;
     const updateNote = db.prepare(query).run(note.title, note.content, note.id);
 
-    console.log(updateNote);
     return {
       success: true,
       data: updateNote,
@@ -166,7 +177,6 @@ ipcMain.handle("getnotebyid", async (event, id) => {
     const query = `SELECT * FROM Notes WHERE id = ?`;
     const getbyid = db.prepare(query).get(id.id);
 
-    console.log(getbyid);
     return {
       success: true,
       data: getbyid,
@@ -184,7 +194,6 @@ ipcMain.handle("favourite-note", async (event, like) => {
     const query = `UPDATE Notes SET like = 1 WHERE user_id = ? AND id = ?`;
     const favourite = db.prepare(query).run(like.user_id, like.id);
 
-    console.log(favourite);
     return {
       success: true,
       data: favourite,
@@ -202,7 +211,6 @@ ipcMain.handle("get-favourites", async (event, like) => {
     const query = `SELECT * FROM Notes WHERE user_id = ? AND like = 1`;
     const getfavouritedata = db.prepare(query).all(like.user_id);
 
-    console.log(getfavouritedata);
     return {
       success: true,
       data: getfavouritedata,
@@ -220,7 +228,6 @@ ipcMain.handle("unfavourite", async (event, like) => {
     const query = `UPDATE Notes SET like = 0 WHERE user_id = ? AND id = ?`;
     const unfavourite = db.prepare(query).run(like.user_id, like.id);
 
-    console.log(unfavourite);
     return {
       success: true,
       data: unfavourite,
@@ -234,27 +241,75 @@ ipcMain.handle("unfavourite", async (event, like) => {
 });
 
 ipcMain.handle("delete-multiple", async (event, ids) => {
-    console.log(ids)
   try {
     if (!ids || ids.length === 0) {
       return { success: false, error: "No IDs provided" };
     }
     const placeholders = ids.map(() => "?").join(",");
-    console.log(placeholders)
-    const query = `DELETE FROM Notes WHERE id IN (${placeholders})`
-    const deletemultiple = db.prepare(query).run(...ids)
+    const query = `DELETE FROM Notes WHERE id IN (${placeholders})`;
+    const deletemultiple = db.prepare(query).run(...ids);
 
     return {
-        success : true ,
-        deleted : deletemultiple.changes
+      success: true,
+      deleted: deletemultiple.changes,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error.message,
+    };
+  }
+});
+
+ipcMain.handle("recycle-bin", async (event, id) => {
+  try {
+    const query = `UPDATE Notes SET recycle = 'bin' WHERE id = ?`;
+    const recyclebin = db.prepare(query).run(id.id);
+    return {
+      success: true,
+      deleted: recyclebin.changes,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error.message,
+    };
+  }
+});
+
+ipcMain.handle("get-recycle", async (event, notes) => {
+  try {
+    const query = `SELECT * FROM Notes WHERE user_id = ? AND recycle = 'bin' `;
+    const getrecycle = db.prepare(query).all(notes.user_id);
+
+    return {
+      success: true,
+      data: getrecycle,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error.message,
+    };
+  }
+});
+
+ipcMain.handle('recover' , async (event , notes)=>{
+  try {
+    const query = `UPDATE Notes SET recycle = 'recover' WHERE id = ?`
+    const recover = db.prepare(query).run(notes.id)
+
+    return {
+      success : true ,
+      recover : recover.changes
     }
   } catch (error) {
     return {
-        success : false ,
-        error : error.message
+      success : false ,
+      error : error.message
     }
   }
-});
+})
 
 app.whenReady().then(() => {
   createWindow();

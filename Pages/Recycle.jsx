@@ -1,18 +1,16 @@
-import React, { use, useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { CircleX, Pencil, Recycle, Star, Trash, Trash2 } from "lucide-react";
+import React, { useEffect, useMemo, useState } from "react";
+import { CircleCheckBig, CircleX, Pencil, Star, Trash2 , Trash } from "lucide-react";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
-const Notes = () => {
+const Recycle = () => {
+  let [user, setUser] = useState(null);
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState(null);
   const [data, setData] = useState([]);
-  const navigate = useNavigate();
-  let [user, setUser] = useState(null);
   const [edit, setEdit] = useState(true);
   const [selectedNotes, setSelectedNotes] = useState([]);
-  const [showConfirm, setShowConfirm] = useState(false);
-  const [deleteid, setDeleteid] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("user"));
@@ -23,7 +21,7 @@ const Notes = () => {
 
     async function fetchData() {
       try {
-        const notes = await window.api.getNotes({ user_id: user.id });
+        const notes = await window.api.getrecycle({ user_id: user.id });
         setData(notes?.data || []);
       } catch (error) {
         toast.error("Failed to fetch notes");
@@ -67,64 +65,6 @@ const Notes = () => {
     );
   };
 
-  const handleDelete = (id) => {
-    setDeleteid(id);
-    setShowConfirm(true);
-  };
-  const handleConfirmDelete = async () => {
-    try {
-      const del = await window.api.deleteNote({ id: deleteid });
-
-      if (del.success) {
-        toast.success("Note delete..");
-        setData((prev) => prev.filter((note) => note.id !== deleteid));
-      } else {
-        toast.error(del.error);
-      }
-    } catch (error) {
-      toast.error(error);
-    }
-    setShowConfirm(false);
-    setDeleteid(null);
-  };
-
-  const handleFavourite = async (user_id, id, like) => {
-    try {
-      if (like !== 1) {
-        const favourite = await window.api.favourite({
-          user_id: user_id,
-          id: id,
-        });
-        if (favourite.success) {
-          toast.success("Notes Added to favourite");
-
-          setData((prev) =>
-            prev.map((note) => (note.id === id ? { ...note, like: 1 } : note)),
-          );
-        } else {
-          toast.error(favourite.error);
-        }
-      } else {
-        const getunfavourite = await window.api.unfavourite({
-          user_id: user_id,
-          id: id,
-        });
-
-        if (getunfavourite.success) {
-          toast.success("Notes deleted from favourite");
-
-          setData((prev) =>
-            prev.map((note) => (note.id === id ? { ...note, like: 0 } : note)),
-          );
-        } else {
-          toast.error(getunfavourite.error);
-        }
-      }
-    } catch (error) {
-      toast.error(error.message || "Something went wrong");
-    }
-  };
-
   const multipleDelete = async () => {
     try {
       const res = await window.api.deleteMultiple(selectedNotes);
@@ -146,27 +86,35 @@ const Notes = () => {
     console.log(selectedNotes);
   };
 
-  const handleRecycle = async ()=>{
+  const handleDelete = async (id) => {
     try {
-      const res = await window.api.recyclebin({ id : deleteid})
-      await window.api.unfavourite({
-        user_id: user.id,
-        id: deleteid,
-      });
-      if(res.success){
-        toast.success("Moved to Recycled Bin")
-        const notes = await window.api.getNotes({ user_id: user.id });
-        setData(notes?.data || [])
+      const del = await window.api.deleteNote({ id: id });
+
+      if (del.success) {
+        toast.success("Note delete..");
+        setData((prev) => prev.filter((note) => note.id !== id));
+      } else {
+        toast.error(del.error);
       }
-
     } catch (error) {
-      toast.error(res.error)
+      toast.error(error);
     }
+  };
 
-    setShowConfirm(false);
-    setDeleteid(null);
+  const handleRecover = async (id ) => {
+        try {
+            const recover = await window.api.recover({ id : id})
 
-  }
+            if(recover.success){
+                toast.success("Note recovered..")
+                setData((prev)=> prev.filter((note)=> note.id !== id))
+            } else {
+                toast.error(recover.error)
+            }
+        } catch (error) {
+            toast.error(error)
+        }
+  };
 
   const handleLogOut = () => {
     localStorage.removeItem("user");
@@ -194,7 +142,10 @@ const Notes = () => {
         </button>
 
         <div className="text-sm mt-6 space-y-2 flex flex-col items-start">
-          <button className="cursor-pointer hover:bg-blue-200 bg-blue-100 text-blue-600 px-3 py-2 rounded-lg w-full outline-none">
+          <button
+            className="cursor-pointer hover:bg-blue-200  text-black px-3 py-2 rounded-lg w-full outline-none"
+            onClick={() => navigate("/notes")}
+          >
             All Notes
           </button>
           <button
@@ -204,7 +155,7 @@ const Notes = () => {
             Favorites
           </button>
           <button
-            className="cursor-pointer hover:bg-green-200 px-3 py-2 rounded-lg w-full outline-none text-black hover:text-green-600"
+            className="cursor-pointer hover:bg-green-200 px-3 py-2 rounded-lg w-full outline-none text-green-600 bg-green-100"
             onClick={() => navigate("/recycle")}
           >
             Recycle Bin
@@ -218,10 +169,11 @@ const Notes = () => {
           Log Out
         </button>
       </div>
-
       <div className="flex-1 p-6 flex flex-col gap-6 overflow-auto">
         <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-semibold text-gray-800">Welcome 👋</h2>
+          <h2 className="text-2xl font-semibold text-gray-800">
+            Recycle Bin 👋
+          </h2>
 
           <div className="flex gap-2">
             {edit ? (
@@ -249,7 +201,6 @@ const Notes = () => {
                     <option value="Newest">Newest</option>
                   </select>
 
-                  {/* Custom Arrow */}
                   <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500">
                     ▼
                   </div>
@@ -303,24 +254,14 @@ const Notes = () => {
                 />
                 {edit ? (
                   <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition">
-                    <button
-                      className="bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600"
-                      onClick={() => navigate(`/update/${note.id}`)}
-                    >
-                      <Pencil size={16} />
-                    </button>
-                    <button
-                      className="text-black p-2 rounded-md cursor-pointer"
-                      onClick={() =>
-                        handleFavourite(note.user_id, note.id, note.like)
-                      }
-                    >
-                      <Star
-                        size={18}
-                        fill={note.like === 1 ? "yellow" : "white"}
-                      />
-                    </button>
+                    
 
+                    <button
+                      className="bg-green-500 text-white p-2 rounded-md hover:bg-green-600"
+                      onClick={() => handleRecover(note.id)}
+                    >
+                      <CircleCheckBig size={16} />
+                    </button>
                     <button
                       className="bg-red-500 text-white p-2 rounded-md hover:bg-red-600"
                       onClick={() => handleDelete(note.id)}
@@ -342,40 +283,8 @@ const Notes = () => {
           </div>
         )}
       </div>
-      {showConfirm && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-xl shadow-xl w-[300px] text-center">
-            <h3 className="text-lg font-semibold mb-3">Delete this note?</h3>
-            <p className="text-sm text-gray-500 mb-5">
-              This action cannot be undone.
-            </p>
-
-            <div className="flex justify-center gap-3">
-              <button
-                onClick={() => setShowConfirm(false)}
-                className="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300"
-              >
-                <CircleX/>
-              </button>
-
-              <button
-                onClick={handleConfirmDelete}
-                className="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600"
-              >
-                <Trash /> 
-              </button>
-              <button
-                onClick={handleRecycle}
-                className="px-5 py-2 rounded-lg bg-green-500 text-white hover:bg-green-600"
-              >
-                <Recycle /> 
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
 
-export default Notes;
+export default Recycle;

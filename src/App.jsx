@@ -8,6 +8,7 @@ import './App.css'
 import Notes from '../Pages/Notes'
 import { Toaster } from "react-hot-toast";
 import Favourite from '../Pages/Favourite'
+import Recycle from '../Pages/Recycle'
 
 const App = () => {
   return (
@@ -22,6 +23,7 @@ const App = () => {
         <Route path='/update/:id' element={<Update />}/>
         <Route path='/notes' element={<Notes />}/>
         <Route path='/favourite' element={<Favourite />}/>
+        <Route path='/recycle' element={<Recycle />}/>
 
       </Routes>
     </HashRouter>
