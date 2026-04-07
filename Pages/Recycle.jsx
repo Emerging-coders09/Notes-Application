@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 const Recycle = () => {
   let [user, setUser] = useState(null);
   const [search, setSearch] = useState("");
-  const [sort, setSort] = useState(null);
+  const [sort, setSort] = useState("Sorting");
   const [data, setData] = useState([]);
   const [edit, setEdit] = useState(true);
   const [selectedNotes, setSelectedNotes] = useState([]);
@@ -80,7 +80,7 @@ const Recycle = () => {
         toast.error(res.error);
       }
     } catch (error) {
-      toast.error("Error :", error);
+      toast.error("Error :", error.message);
     }
 
     console.log(selectedNotes);
@@ -97,7 +97,7 @@ const Recycle = () => {
         toast.error(del.error);
       }
     } catch (error) {
-      toast.error(error);
+      toast.error(error.message);
     }
   };
 

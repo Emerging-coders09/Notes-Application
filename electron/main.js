@@ -51,6 +51,11 @@ db.exec(
     `,
 );
 
+db.exec(
+ `ALTER TABLE users ADD COLUMN status TEXT DEFAULT 'active'`
+
+)
+
 ipcMain.handle("register", async (event, user) => {
   try {
     const query = `INSERT INTO users (name , email , password) VALUES (?,?,?)`;
@@ -310,6 +315,8 @@ ipcMain.handle('recover' , async (event , notes)=>{
     }
   }
 })
+
+
 
 app.whenReady().then(() => {
   createWindow();

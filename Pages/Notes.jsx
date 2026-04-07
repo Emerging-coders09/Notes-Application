@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 
 const Notes = () => {
   const [search, setSearch] = useState("");
-  const [sort, setSort] = useState(null);
+  const [sort, setSort] = useState("Sorting");
   const [data, setData] = useState([]);
   const navigate = useNavigate();
   let [user, setUser] = useState(null);

@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 const Favourite = () => {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
-  const [sort, setSort] = useState(null);
+  const [sort, setSort] = useState("Sorting");
   const [data, setData] = useState([]);
   let [user, setUser] = useState(null);
   const [edit, setEdit] = useState(true);
