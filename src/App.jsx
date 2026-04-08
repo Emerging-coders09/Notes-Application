@@ -1,14 +1,14 @@
 import React from 'react'
 import {  Route, Routes, HashRouter } from 'react-router-dom'
-import Login from '../Pages/Login'
-import Sign from '../Pages/Sign'
-import Add from '../Pages/Add'
-import Update from '../Pages/Update'
+import Login from './Pages/Login'
+import Sign from './Pages/Sign'
+import Add from './Pages/Add'
+import Update from './Pages/Update'
 import './App.css'
-import Notes from '../Pages/Notes'
+import Notes from './Pages/Notes'
 import { Toaster } from "react-hot-toast";
-import Favourite from '../Pages/Favourite'
-import Recycle from '../Pages/Recycle'
+import Favourite from './Pages/Favourite'
+import Recycle from './Pages/Recycle'
 
 const App = () => {
   return (

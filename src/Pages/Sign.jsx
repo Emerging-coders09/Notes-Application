@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'
+import '../Css/Login&Sign.css'
 
 const Sign = () => {
     const navigate = useNavigate()
@@ -42,69 +43,69 @@ const Sign = () => {
     }
 
   return (
-    <div className="w-full h-screen flex items-center justify-center bg-gray-100">
+    <div className="container">
       
-      <div className="w-[400px] bg-white rounded-2xl shadow-lg p-8 flex flex-col gap-6">
+      <div className="box">
         
-        <div className="text-center">
-          <h1 className="text-3xl font-semibold text-gray-800">Create Account</h1>
-          <p className="text-gray-500 text-sm">Start organizing your notes</p>
+        <div className="header">
+          <h1 className="">Create Account</h1>
+          <p className="">Start organizing your notes</p>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className="fields">
           
-          <div className="flex flex-col gap-1">
-            <label className="text-sm text-gray-600">Full Name</label>
+          <div className="field">
+            <label className="">Full Name</label>
             <input
               type="text"
               placeholder="Enter your name"
-              className="px-3 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-blue-400"
+              className=""
               required
               onChange={(e)=> setValues({...values , name : e.target.value})}
             />
           </div>
 
-          <div className="flex flex-col gap-1">
-            <label className="text-sm text-gray-600">Email</label>
+          <div className="field">
+            <label className="">Email</label>
             <input
               type="email"
               placeholder="Enter your email"
-              className="px-3 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-blue-400"
+              className=""
               required
               onChange={(e)=> setValues({...values , email : e.target.value})}
             />
           </div>
 
-          <div className="flex flex-col gap-1">
-            <label className="text-sm text-gray-600">Password</label>
+          <div className="field">
+            <label className="">Password</label>
             <input
               type="password"
               placeholder="Create a password"
-              className="px-3 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-blue-400"
+              className=""
               required
               onChange={(e)=> setValues({...values , password : e.target.value})}
             />
           </div>
 
-          <div className="flex flex-col gap-1">
-            <label className="text-sm text-gray-600">Confirm Password</label>
+          <div className="field">
+            <label className="">Confirm Password</label>
             <input
               type="password"
               placeholder="Confirm your password"
-              className="px-3 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-blue-400"
+              className=""
               required
               onChange={(e)=> setValues({...values , confirmPassword : e.target.value})}
             />
           </div>
 
-          <button className="bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg transition" onClick={handleRegister}>
+          <button className="" onClick={handleRegister}>
             Sign Up
           </button>
         </div>
 
-        <p className="text-sm text-center text-gray-500">
+        <p className="footer">
           Already have an account? 
-          <button className="text-blue-500 cursor-pointer ml-1" onClick={()=> navigate('/')}>
+          <button className="" onClick={()=> navigate('/')}>
             Log in
           </button>
         </p>

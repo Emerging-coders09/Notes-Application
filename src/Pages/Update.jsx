@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import { useNavigate, useParams } from 'react-router-dom'
+import '../Css/Add&Update.css'
 
 const Update = () => {
   const navigate = useNavigate()
@@ -55,13 +56,13 @@ const Update = () => {
   }
 
   return (
-     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-2xl bg-white rounded-2xl shadow-lg p-6">
+     <div className="container">
+      <div className="box-container">
 
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-semibold text-gray-800">Update Note</h1>
+        <div className="header">
+          <h1 className="">Update Note</h1>
 
-          <button className="text-sm text-gray-500 hover:bg-red-500 transition ease-in-out px-3 py-2 rounded-xl outline-none hover:text-white cursor-pointer" onClick={()=> navigate('/notes')}>
+          <button className="" onClick={()=> navigate('/notes')}>
             Cancel
           </button>
         </div>
@@ -94,8 +95,8 @@ const Update = () => {
             />
           </div>
 
-          <div className="flex justify-end gap-3 pt-4">
-            <button className="px-5 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 shadow-md" onClick={handleSave}>
+          <div className="footer">
+            <button className="updatebtn" onClick={handleSave}>
               Update Note
             </button>
           </div>

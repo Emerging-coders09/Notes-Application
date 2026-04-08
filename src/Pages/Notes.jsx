@@ -2,6 +2,7 @@ import React, { use, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CircleX, Pencil, Recycle, Star, Trash, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
+import '../Css/Notes.css'
 
 const Notes = () => {
   const [search, setSearch] = useState("");
@@ -25,6 +26,7 @@ const Notes = () => {
       try {
         const notes = await window.api.getNotes({ user_id: user.id });
         setData(notes?.data || []);
+        console.log(data)
       } catch (error) {
         toast.error("Failed to fetch notes");
       }
@@ -175,36 +177,36 @@ const Notes = () => {
   };
 
   return (
-    <div className="w-full h-screen flex bg-gray-100">
-      <div className="w-[260px] bg-white shadow-md p-5 flex flex-col">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6">NoteApp</h1>
+    <div className="container">
+      <div className="sidebar">
+        <h1 className="">NoteApp</h1>
 
-        <div className="mb-6 p-3 bg-gray-100 rounded-xl">
-          <p className="text-sm text-gray-500">Logged in as</p>
-          <p className="font-medium text-gray-800 truncate">
+        <div className="user">
+          <p className="">Logged in as</p>
+          <span className="">
             {user?.name || "User"}
-          </p>
+          </span>
         </div>
 
         <button
-          className="bg-blue-500 text-white py-2 rounded-xl hover:bg-blue-600 transition"
+          className="Addbtn button"
           onClick={() => navigate("/add")}
         >
           + Add Note
         </button>
 
-        <div className="text-sm mt-6 space-y-2 flex flex-col items-start">
-          <button className="cursor-pointer hover:bg-blue-200 bg-blue-100 text-blue-600 px-3 py-2 rounded-lg w-full outline-none">
+        <div className="section">
+          <button className="button btn">
             All Notes
           </button>
           <button
-            className="cursor-pointer hover:bg-gray-100 px-3 py-2 rounded-lg w-full outline-none"
+            className=" button btn"
             onClick={() => navigate("/favourite")}
           >
             Favorites
           </button>
           <button
-            className="cursor-pointer hover:bg-green-200 px-3 py-2 rounded-lg w-full outline-none text-black hover:text-green-600"
+            className=" button btn"
             onClick={() => navigate("/recycle")}
           >
             Recycle Bin
@@ -212,22 +214,22 @@ const Notes = () => {
         </div>
 
         <button
-          className="mt-auto bg-red-500 text-white py-2 rounded-xl hover:bg-red-600 transition"
+          className="logout button"
           onClick={handleLogOut}
         >
           Log Out
         </button>
       </div>
 
-      <div className="flex-1 p-6 flex flex-col gap-6 overflow-auto">
-        <div className="flex justify-between items-center">
+      <div className="Home">
+        <div className="top">
           <h2 className="text-2xl font-semibold text-gray-800">Welcome 👋</h2>
 
-          <div className="flex gap-2">
+          <div className="left-top">
             {edit ? (
-              <div className="flex gap-3 justify-center items-center">
+              <div className="left-top">
                 <button
-                  className="bg-blue-500 hover:bg-blue-600 p-3 rounded-md cursor-pointer"
+                  className="edit button"
                   onClick={() => {
                     setEdit(false);
                     setSelectedNotes([]);
@@ -235,13 +237,11 @@ const Notes = () => {
                 >
                   <Pencil size={20} stroke="white" />
                 </button>
-                <div className="relative">
+                <div className="sortselect">
                   <select
                     value={sort}
                     onChange={(e) => setSort(e.target.value)}
-                    className="appearance-none bg-white border border-gray-300 text-gray-700 px-4 py-2 pr-10 rounded-xl shadow-sm 
-                      focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 
-                      hover:border-gray-400 transition cursor-pointer"
+                    className=""
                   >
                     <option value="Sorting">Sort By</option>
                     <option value="Ascending">Ascending</option>
@@ -249,8 +249,7 @@ const Notes = () => {
                     <option value="Newest">Newest</option>
                   </select>
 
-                  {/* Custom Arrow */}
-                  <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500">
+                  <div className="arrow">
                     ▼
                   </div>
                 </div>
@@ -274,24 +273,24 @@ const Notes = () => {
             <input
               type="text"
               placeholder="Search notes..."
-              className="px-4 py-2 border rounded-xl outline-none focus:ring-2 focus:ring-blue-400"
+              className="search"
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
         </div>
 
         {filteredData.length === 0 ? (
-          <div className="flex flex-col items-center justify-center text-gray-400 mt-20">
-            <p className="text-lg">No notes yet</p>
-            <p className="text-sm">Start by adding a new note</p>
+          <div className="empty">
+            <p className="">No notes yet</p>
+            <p className="">Start by adding a new note</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="data">
             {filteredData.map((note) => (
               <div
                 key={note.id}
                 onClick={() => !edit && toggleSelect(note.id)}
-                className={`bg-white p-5 rounded-2xl shadow hover:shadow-lg transition relative group cursor-pointer  ${selectedNotes.includes(note.id) ? "ring-2 ring-blue-500" : ""}`}
+                className={`note  ${selectedNotes.includes(note.id) ? "ring-2 ring-blue-500" : ""}`}
               >
                 <input
                   type="checkbox"
@@ -302,15 +301,15 @@ const Notes = () => {
                   className={edit ? "hidden" : "accent-blue-500 h-4 w-4"}
                 />
                 {edit ? (
-                  <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition">
+                  <div className="fnbtn">
                     <button
-                      className="bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600"
+                      className="button editbtn"
                       onClick={() => navigate(`/update/${note.id}`)}
                     >
                       <Pencil size={16} />
                     </button>
                     <button
-                      className="text-black p-2 rounded-md cursor-pointer"
+                      className="button"
                       onClick={() =>
                         handleFavourite(note.user_id, note.id, note.like)
                       }
@@ -318,11 +317,12 @@ const Notes = () => {
                       <Star
                         size={18}
                         fill={note.like === 1 ? "yellow" : "white"}
+                        stroke="black"
                       />
                     </button>
 
                     <button
-                      className="bg-red-500 text-white p-2 rounded-md hover:bg-red-600"
+                      className="button deletebtn"
                       onClick={() => handleDelete(note.id)}
                     >
                       <Trash2 size={16} />
@@ -330,11 +330,11 @@ const Notes = () => {
                   </div>
                 ) : null}
 
-                <h3 className="font-semibold text-lg text-gray-800 mb-2">
+                <h3 className="title">
                   {note.title}
                 </h3>
 
-                <p className="text-sm text-gray-500 line-clamp-3">
+                <p className="content">
                   {note.content}
                 </p>
               </div>

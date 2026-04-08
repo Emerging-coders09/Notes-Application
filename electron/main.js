@@ -13,7 +13,6 @@ const createWindow = () => {
     height: 800,
     webPreferences: {
       preload: path.join(__dirname, "../electron/preload.js"),
-      contextIsolation: true,
     },
   });
 
@@ -51,10 +50,6 @@ db.exec(
     `,
 );
 
-db.exec(
- `ALTER TABLE users ADD COLUMN status TEXT DEFAULT 'active'`
-
-)
 
 ipcMain.handle("register", async (event, user) => {
   try {
@@ -132,6 +127,7 @@ ipcMain.handle("get-notes", async (event, user) => {
   try {
     const query = `SELECT * FROM notes WHERE user_id = ? AND (recycle != 'bin' OR recycle IS NULL);`;
     const getdata = db.prepare(query).all(user.user_id);
+    console.log(getdata)
     return {
       success: true,
       data: getdata,
