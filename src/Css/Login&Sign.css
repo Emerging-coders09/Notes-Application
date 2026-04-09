@@ -29,6 +29,7 @@
 .box .header {
     text-align: center;
     width: 100%;
+    font-size: 34px;
     
 }
 .box .header h1{
@@ -75,7 +76,12 @@
     cursor: pointer;
     outline: none;
     border: 1px solid;
+    transition: 0.3s ease-in;
     font-size: 15px;
+}
+.box .fields button:focus{
+    background-color: #256dda;
+    border: 1px solid orange;
 }
 .box .footer{
     color: #6a7282;

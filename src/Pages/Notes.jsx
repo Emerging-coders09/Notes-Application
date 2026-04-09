@@ -177,7 +177,7 @@ const Notes = () => {
   };
 
   return (
-    <div className="container">
+    <div className="notes-container">
       <div className="sidebar">
         <h1 className="">NoteApp</h1>
 
@@ -196,7 +196,7 @@ const Notes = () => {
         </button>
 
         <div className="section">
-          <button className="button btn">
+          <button className="button btn active-all">
             All Notes
           </button>
           <button
@@ -223,7 +223,7 @@ const Notes = () => {
 
       <div className="Home">
         <div className="top">
-          <h2 className="text-2xl font-semibold text-gray-800">Welcome 👋</h2>
+          <h2 className="">Welcome 👋</h2>
 
           <div className="left-top">
             {edit ? (
@@ -241,7 +241,7 @@ const Notes = () => {
                   <select
                     value={sort}
                     onChange={(e) => setSort(e.target.value)}
-                    className=""
+                    className="select"
                   >
                     <option value="Sorting">Sort By</option>
                     <option value="Ascending">Ascending</option>
@@ -255,16 +255,16 @@ const Notes = () => {
                 </div>
               </div>
             ) : (
-              <div className="flex gap-3">
+              <div className="left-top">
                 <button
-                  className="bg-orange-500 hover:bg-orange-600 p-3 rounded-md cursor-pointer"
+                  className="button btn-orange"
                   onClick={() => {
                     setEdit(true);
                   }}
                 >
                   <CircleX size={20} stroke="white" />
                 </button>
-                <button className="bg-red-500 hover:bg-red-600 p-3 rounded-md cursor-pointer">
+                <button className="button btn-red">
                   <Trash2 size={20} stroke="white" onClick={multipleDelete} />
                 </button>
               </div>
@@ -290,7 +290,7 @@ const Notes = () => {
               <div
                 key={note.id}
                 onClick={() => !edit && toggleSelect(note.id)}
-                className={`note  ${selectedNotes.includes(note.id) ? "ring-2 ring-blue-500" : ""}`}
+                className={`note ${selectedNotes.includes(note.id) ? "selected" : ""}`}
               >
                 <input
                   type="checkbox"
@@ -298,7 +298,7 @@ const Notes = () => {
                   onChange={() => toggleSelect(note.id)}
                   name=""
                   id=""
-                  className={edit ? "hidden" : "accent-blue-500 h-4 w-4"}
+                  className={edit ? "hidden" : "checked"}
                 />
                 {edit ? (
                   <div className="fnbtn">
@@ -318,7 +318,7 @@ const Notes = () => {
                         size={18}
                         fill={note.like === 1 ? "yellow" : "white"}
                         stroke="black"
-                      />
+                      /> 
                     </button>
 
                     <button
@@ -343,30 +343,30 @@ const Notes = () => {
         )}
       </div>
       {showConfirm && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-xl shadow-xl w-[300px] text-center">
-            <h3 className="text-lg font-semibold mb-3">Delete this note?</h3>
-            <p className="text-sm text-gray-500 mb-5">
+        <div className="modal-overlay">
+          <div className="modal-box ">
+            <h3 className="">Delete this note?</h3>
+            <p className="">
               This action cannot be undone.
             </p>
 
-            <div className="flex justify-center gap-3">
+            <div className=" modal-box-1">
               <button
                 onClick={() => setShowConfirm(false)}
-                className="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300"
+                className="btn-orange  modal-btn"
               >
                 <CircleX/>
               </button>
 
               <button
                 onClick={handleConfirmDelete}
-                className="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600"
+                className="btn-red modal-btn"
               >
                 <Trash /> 
               </button>
               <button
                 onClick={handleRecycle}
-                className="px-5 py-2 rounded-lg bg-green-500 text-white hover:bg-green-600"
+                className="modal-btn btn-green"
               >
                 <Recycle /> 
               </button>

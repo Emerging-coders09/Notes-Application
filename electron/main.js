@@ -73,7 +73,6 @@ ipcMain.handle('get-users' , async (event , user)=>{
     const query = `SELECT * FROM users WHERE email = ?`
     const User = db.prepare(query).get(user.email)
 
-    console.log(User)
     return {
       success : true,
       data : User
@@ -127,7 +126,6 @@ ipcMain.handle("get-notes", async (event, user) => {
   try {
     const query = `SELECT * FROM notes WHERE user_id = ? AND (recycle != 'bin' OR recycle IS NULL);`;
     const getdata = db.prepare(query).all(user.user_id);
-    console.log(getdata)
     return {
       success: true,
       data: getdata,
