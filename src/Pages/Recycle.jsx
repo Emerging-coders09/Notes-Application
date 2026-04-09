@@ -84,7 +84,6 @@ const Recycle = () => {
       toast.error("Error :", error.message);
     }
 
-    console.log(selectedNotes);
   };
 
   const handleDelete = async (id) => {
@@ -116,6 +115,22 @@ const Recycle = () => {
             toast.error(error)
         }
   };
+  const multipleRecycle = async ()=>{
+    try {
+        const recoverMulitple = await window.api.recoverMultiple(selectedNotes)
+
+        if(recoverMulitple.success){
+          toast.success("Notes Recoverd..")
+          setData((prev)=> prev.filter((note)=> !selectedNotes.includes(note.id)))
+          setSelectedNotes([])
+          setEdit(false)
+        }else {
+          toast.error(recoverMulitple.error)
+        }
+    } catch (error) {
+        toast.error(error)
+    }
+  }
 
   const handleLogOut = () => {
     localStorage.removeItem("user");
@@ -211,12 +226,16 @@ const Recycle = () => {
                   className="button btn-orange"
                   onClick={() => {
                     setEdit(true);
+                    setSelectedNotes([])
                   }}
                 >
                   <CircleX size={20} stroke="white" />
                 </button>
-                <button className="button btn-red">
-                  <Trash2 size={20} stroke="white" onClick={multipleDelete} />
+                <button className="button btn-red" onClick={multipleDelete}>
+                  <Trash2 size={20} stroke="white"  />
+                </button>
+                <button className="button btn-green" onClick={multipleRecycle}>
+                  <CircleCheckBig size={16} stroke="white" />
                 </button>
               </div>
             )}

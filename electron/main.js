@@ -9,7 +9,7 @@ const __dirname = path.dirname(__filename);
 
 const createWindow = () => {
   win = new BrowserWindow({
-    width: 1200,
+    width: 1400,
     height: 800,
     webPreferences: {
       preload: path.join(__dirname, "../electron/preload.js"),
@@ -302,6 +302,50 @@ ipcMain.handle('recover' , async (event , notes)=>{
       success : true ,
       recover : recover.changes
     }
+  } catch (error) {
+    return {
+      success : false ,
+      error : error.message
+    }
+  }
+})
+
+ipcMain.handle('recycle-multitple' , async (event , ids)=>{
+  if (!ids || ids.length === 0) {
+      return { success: false, error: "No IDs provided" };
+    }
+  try {
+
+    const placeholders = ids.map(()=> '?').join(',')
+    const query = `UPDATE Notes SET recycle = 'bin' WHERE id IN (${placeholders})`  
+    const recycleMultiple = db.prepare(query).run(...ids)
+
+    return {
+      success : true,
+      recycle : recycleMultiple.changes
+    }
+  } catch (error) {
+    return {
+      success : false ,
+      error : error.message
+    }
+  }
+})
+
+ipcMain.handle('recover-Multiple', async (event , notes)=>{
+  if (!notes || notes.length === 0) {
+      return { success: false, error: "No IDs provided" };
+    }
+  try {
+      const placeholders = notes.map(()=> '?').join(',')
+      const query = `UPDATE Notes SET recycle = 'recover' WHERE id IN (${placeholders})`
+      const recoverMultiple = db.prepare(query).run(...notes)
+
+      return {
+        success : true,
+        recover : recoverMultiple.changes
+      }
+
   } catch (error) {
     return {
       success : false ,

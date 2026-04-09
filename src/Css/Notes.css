@@ -135,7 +135,7 @@
 }
 .Home .top h2{
     font-size: 24px;
-    font-weight: 500;
+    font-weight: 500    ;
 }
 .top .left-top {
   display: flex;
@@ -214,6 +214,7 @@
 .data .note.selected {
   box-shadow: 0 0 0 2px #3b82f6;
 }
+
 .data .note .title {
   font-weight: 600;
   font-size: 18px;
@@ -339,7 +340,7 @@
   background-color: oklch(64.6% 0.222 41.116);
 }
 .btn-green {
-  padding: 8px 20px;
+/* padding: 8px 20px; */
   background-color: oklch(72.3% 0.219 149.579);
 }
 .btn-green:hover {

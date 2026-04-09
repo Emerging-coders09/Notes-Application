@@ -70,9 +70,13 @@ const Notes = () => {
   };
 
   const handleDelete = (id) => {
-    setDeleteid(id);
     setShowConfirm(true);
+    if(selectedNotes.length === 0){
+
+      setDeleteid(id);
+    }
   };
+
   const handleConfirmDelete = async () => {
     try {
       const del = await window.api.deleteNote({ id: deleteid });
@@ -144,9 +148,29 @@ const Notes = () => {
     } catch (error) {
       toast.error("Error :", error);
     }
-
-    console.log(selectedNotes);
+    setShowConfirm(false)
+    setDeleteid(null)
   };
+  const handleMultipleRecycle = async ()=> {
+      try {
+        const res = await  window.api.recycleMultiple(selectedNotes)
+
+        if(res.success){
+          toast.success("Notes Moved to Recycle.")
+          setData((prev)=> 
+            prev.filter((note)=> !selectedNotes.includes(note.id)),
+          );
+          setSelectedNotes([])
+          setEdit(false)
+        } else {
+          toast.error(res.error)
+        }
+       } catch (error) {
+          toast.error(error)
+      }
+      setShowConfirm(false)
+      setDeleteid(null)
+  }
 
   const handleRecycle = async ()=>{
     try {
@@ -260,12 +284,13 @@ const Notes = () => {
                   className="button btn-orange"
                   onClick={() => {
                     setEdit(true);
+                    setSelectedNotes([])
                   }}
                 >
                   <CircleX size={20} stroke="white" />
                 </button>
                 <button className="button btn-red">
-                  <Trash2 size={20} stroke="white" onClick={multipleDelete} />
+                  <Trash2 size={20} stroke="white" onClick={handleDelete} />
                 </button>
               </div>
             )}
@@ -359,13 +384,13 @@ const Notes = () => {
               </button>
 
               <button
-                onClick={handleConfirmDelete}
+                onClick={selectedNotes.length === 0 ? handleConfirmDelete : multipleDelete}
                 className="btn-red modal-btn"
               >
                 <Trash /> 
               </button>
               <button
-                onClick={handleRecycle}
+                onClick={selectedNotes.length === 0 ? handleRecycle : handleMultipleRecycle}
                 className="modal-btn btn-green"
               >
                 <Recycle /> 

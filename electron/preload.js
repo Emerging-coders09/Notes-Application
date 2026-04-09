@@ -16,5 +16,7 @@ contextBridge.exposeInMainWorld('api', {
     recyclebin : (id) => ipcRenderer.invoke('recycle-bin' , id),
     getrecycle : (notes)=> ipcRenderer.invoke('get-recycle' , notes),
     recover : (notes)=> ipcRenderer.invoke('recover', notes),
-    deactivate : (user)=> ipcRenderer.invoke('deactivate' , user)
+    deactivate : (user)=> ipcRenderer.invoke('deactivate' , user),
+    recycleMultiple : (ids)=> ipcRenderer.invoke('recycle-multitple', ids),
+    recoverMultiple : (notes)=> ipcRenderer.invoke('recover-Multiple', notes)
 })
