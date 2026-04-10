@@ -3,8 +3,11 @@ import { CircleCheckBig, CircleX, Pencil, Star, Trash2 , Trash } from "lucide-re
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import '../Css/Notes.css'
+import { useDispatch, useSelector } from "react-redux";
+import { logout } from "../redux/reducers/authReducer";
 
 const Recycle = () => {
+  const dispatch = useDispatch()
   let [user, setUser] = useState(null);
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState("Sorting");
@@ -12,11 +15,13 @@ const Recycle = () => {
   const [edit, setEdit] = useState(true);
   const [selectedNotes, setSelectedNotes] = useState([]);
   const navigate = useNavigate();
-
+  const userId = useSelector((state)=> state.auth.user.data)
   useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem("user"));
-    setUser(storedUser);
-  }, []);
+    if(userId){
+
+      setUser(userId)
+    }
+  }, [userId]);
   useEffect(() => {
     if (!user) return;
 
@@ -133,9 +138,9 @@ const Recycle = () => {
   }
 
   const handleLogOut = () => {
-    localStorage.removeItem("user");
     toast.success("LoggedOut successfully");
     navigate("/");
+    dispatch(logout())
   };
 
   return (

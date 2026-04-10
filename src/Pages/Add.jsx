@@ -3,27 +3,39 @@ import { useNavigate } from 'react-router-dom'
 import toast from "react-hot-toast";
 import { ArrowLeft, Save } from "lucide-react";
 import '../Css/Add&Update.css'
+import { useDispatch, useSelector } from 'react-redux';
+import { addNote } from '../redux/reducers/notesReducer';
 
 const Add = () => {
+  const dispatch = useDispatch()
   const navigate = useNavigate()
   const [title , setTitle] = useState('')
   const [content , setContent] = useState("")
+  const userId = useSelector((state)=> state.auth.user.data)
   
   const handleSave = async ()=>{
     if(title === '' || content === ''){
       return toast.error("Enter both fields")
     }
     try {
-      const user = JSON.parse(localStorage.getItem("user"))
-      const addata = await window.api.addNote({
-        user_id : user.id,
+
+      const adduser = {
+        user_id : userId.id,
         title : title,
         content : content
-      })
+      }
+      // const User = JSON.parse(localStorage.getItem("user"))
+      // const addata = await window.api.addNote({
+      //   user_id : userId.id,
+      //   title : title,
+      //   content : content
+      // })
+      const addata = dispatch(addNote(adduser))
       
-      if(addata.success){
+      if(addata){
         toast.success("Note saved successfully 🎉")
         navigate('/notes')
+        
       }else {
         console.log("Error : " , addata.error)
       }

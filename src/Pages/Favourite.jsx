@@ -2,23 +2,28 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CircleX, Pencil, Recycle, Star, Trash, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
-import '../Css/Notes.css'
+import "../Css/Notes.css";
+import { useDispatch, useSelector } from "react-redux";
+import { logout } from "../redux/reducers/authReducer";
 
 const Favourite = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch()
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState("Sorting");
   const [data, setData] = useState([]);
   let [user, setUser] = useState(null);
   const [edit, setEdit] = useState(true);
   const [selectedNotes, setSelectedNotes] = useState([]);
-   const [showConfirm, setShowConfirm] = useState(false);
-    const [deleteid, setDeleteid] = useState(null);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [deleteid, setDeleteid] = useState(null);
 
+  const userId = useSelector((state) => state.auth.user.data);
   useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem("user"));
-    setUser(storedUser);
-  }, []);
+    if (userId) {
+      setUser(userId);
+    }
+  }, [userId]);
   useEffect(() => {
     if (!user) return;
 
@@ -29,10 +34,9 @@ const Favourite = () => {
     fetchData();
   }, [user]);
 
-    const handleDelete = (id) => {
+  const handleDelete = (id) => {
     setShowConfirm(true);
-    if(selectedNotes.length === 0){
-
+    if (selectedNotes.length === 0) {
       setDeleteid(id);
     }
   };
@@ -121,57 +125,54 @@ const Favourite = () => {
     } catch (error) {
       toast.error("Error :", error);
     }
-    setShowConfirm(false)
-    setDeleteid(null)
+    setShowConfirm(false);
+    setDeleteid(null);
   };
-   const handleMultipleRecycle = async ()=> {
-      try {
-        const res = await  window.api.recycleMultiple(selectedNotes)
-
-        if(res.success){
-          toast.success("Notes Moved to Recycle.")
-          setData((prev)=> 
-            prev.filter((note)=> !selectedNotes.includes(note.id)),
-          );
-          setSelectedNotes([])
-          setEdit(false)
-        } else {
-          toast.error(res.error)
-        }
-       } catch (error) {
-          toast.error(error)
-      }
-      setShowConfirm(false)
-      setDeleteid(null)
-  }
-
-   const handleRecycle = async ()=>{
+  const handleMultipleRecycle = async () => {
     try {
-      const res = await window.api.recyclebin({ id : deleteid})
+      const res = await window.api.recycleMultiple(selectedNotes);
+
+      if (res.success) {
+        toast.success("Notes Moved to Recycle.");
+        setData((prev) =>
+          prev.filter((note) => !selectedNotes.includes(note.id)),
+        );
+        setSelectedNotes([]);
+        setEdit(false);
+      } else {
+        toast.error(res.error);
+      }
+    } catch (error) {
+      toast.error(error);
+    }
+    setShowConfirm(false);
+    setDeleteid(null);
+  };
+
+  const handleRecycle = async () => {
+    try {
+      const res = await window.api.recyclebin({ id: deleteid });
       await window.api.unfavourite({
         user_id: user.id,
         id: deleteid,
       });
-      if(res.success){
-        toast.success("Moved to Recycled Bin")
+      if (res.success) {
+        toast.success("Moved to Recycled Bin");
         const notes = await window.api.getfavourite({ user_id: user.id });
-        setData(notes?.data || [])
+        setData(notes?.data || []);
       }
-
     } catch (error) {
-      toast.error(res.error)
+      toast.error(res.error);
     }
 
     setShowConfirm(false);
     setDeleteid(null);
-
-  }
+  };
 
   const handleLogOut = () => {
-    localStorage.removeItem("user");
     toast.success("LoggedOut successfully");
     navigate("/");
-    
+    dispatch(logout())
   };
 
   return (
@@ -181,48 +182,30 @@ const Favourite = () => {
 
         <div className="user">
           <p className="">Logged in as</p>
-          <span className="">
-            {user?.name || "User"}
-          </span>
+          <span className="">{user?.name || "User"}</span>
         </div>
 
-        <button
-          className="Addbtn button"
-          onClick={() => navigate("/add")}
-        >
+        <button className="Addbtn button" onClick={() => navigate("/add")}>
           + Add Note
         </button>
 
         <div className="section">
-          <button
-            className="button btn"
-            onClick={() => navigate("/notes")}
-          >
+          <button className="button btn" onClick={() => navigate("/notes")}>
             All Notes
           </button>
-          <button className="button btn active-favourite ">
-            Favorites
-          </button>
-          <button
-            className="button btn"
-            onClick={() => navigate("/recycle")}
-          >
+          <button className="button btn active-favourite ">Favorites</button>
+          <button className="button btn" onClick={() => navigate("/recycle")}>
             Recycle Bin
           </button>
         </div>
 
-        <button
-          className="logout"
-          onClick={handleLogOut}
-        >
+        <button className="logout" onClick={handleLogOut}>
           Log Out
         </button>
       </div>
       <div className="Home">
         <div className="top">
-          <h2 className="">
-            Favourite Notes 👋
-          </h2>
+          <h2 className="">Favourite Notes 👋</h2>
           <div className="left-top">
             {edit ? (
               <div className="left-top">
@@ -247,9 +230,7 @@ const Favourite = () => {
                     <option value="Newest">Newest</option>
                   </select>
 
-                  <div className="arrow">
-                    ▼
-                  </div>
+                  <div className="arrow">▼</div>
                 </div>
               </div>
             ) : (
@@ -258,7 +239,7 @@ const Favourite = () => {
                   className="button btn-orange"
                   onClick={() => {
                     setEdit(true);
-                    setSelectedNotes([])
+                    setSelectedNotes([]);
                   }}
                 >
                   <CircleX size={20} stroke="white" />
@@ -329,15 +310,11 @@ const Favourite = () => {
                   </div>
                 ) : null}
 
-                <h3 className="title">
-                  {note.title}
-                </h3>
+                <h3 className="title">{note.title}</h3>
 
-                <p className="content">
-                  {note.content}
-                </p>
+                <p className="content">{note.content}</p>
               </div>
-            ))} 
+            ))}
           </div>
         )}
       </div>
@@ -345,29 +322,35 @@ const Favourite = () => {
         <div className="modal-overlay">
           <div className="modal-box">
             <h3 className="">Delete this note?</h3>
-            <p className="">
-              This action cannot be undone.
-            </p>
+            <p className="">This action cannot be undone.</p>
 
             <div className="modal-box-1">
               <button
                 onClick={() => setShowConfirm(false)}
                 className="btn-orange modal-btn"
               >
-                <CircleX/>
+                <CircleX />
               </button>
 
               <button
-                onClick={selectedNotes.length === 0 ? handleConfirmDelete : multipleDelete}
+                onClick={
+                  selectedNotes.length === 0
+                    ? handleConfirmDelete
+                    : multipleDelete
+                }
                 className="modal-btn btn-red"
               >
-                <Trash /> 
+                <Trash />
               </button>
               <button
-                onClick={selectedNotes.length === 0 ? handleRecycle : handleMultipleRecycle}
+                onClick={
+                  selectedNotes.length === 0
+                    ? handleRecycle
+                    : handleMultipleRecycle
+                }
                 className="modal-btn btn-green"
               >
-                <Recycle /> 
+                <Recycle />
               </button>
             </div>
           </div>

@@ -1,36 +1,41 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import '../Css/Login&Sign.css'
-
+import "../Css/Login&Sign.css";
+import { useDispatch, useSelector } from "react-redux";
+import {  loginUser } from "../redux/reducers/authReducer";
 
 const Login = () => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [values, setValues] = useState({
     email: "",
     password: "",
   });
 
-  const handleLogin = async () => {
+  const User = {
+    email : values.email,
+    password : values.password
+  }
+
+  const userId = useSelector((state)=> state.auth.user)
+
+  const handleLogin = () => {
     if (!values.email || !values.password) {
       return toast.error("Please fill all fields");
     }
-
     try {
-      const data = await window.api.login({
-        email: values.email,
-        password: values.password,
-      });
-      console.log(data);
-
-      if (data?.data && data.data.length !== 0) {
-        console.log("Data : ", data.data);
-        localStorage.setItem("user", JSON.stringify(data.data));
-        toast.success("Login Successfully")
+       dispatch(loginUser(User));
+      // const data = await window.api.login({
+      //   email: values.email,
+      //   password: values.password,
+      // });
+      console.log(userId)
+      if (userId) {
+        toast.success("Login Successfully");
         navigate("/notes");
       } else {
-        console.log("Error :", data.error || "User not Found");
-        toast.error(data.error || "User not Found")
+        toast.error(userId.error || "User not Found");
       }
     } catch (error) {
       console.error(error);
@@ -70,10 +75,7 @@ const Login = () => {
             />
           </div>
 
-          <button
-            className=""
-            onClick={handleLogin}
-          >
+          <button className="" onClick={handleLogin}>
             Log In
           </button>
         </div>

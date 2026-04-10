@@ -2,9 +2,12 @@ import React, { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import { useNavigate, useParams } from 'react-router-dom'
 import '../Css/Add&Update.css'
+import { useDispatch } from 'react-redux'
+import { updateNote } from '../redux/reducers/notesReducer'
 
 const Update = () => {
   const navigate = useNavigate()
+  const dispatch = useDispatch()
   const {id} = useParams()
   const [values , setValues] = useState({
     title : "",
@@ -34,6 +37,11 @@ const Update = () => {
     fetchData()
   },[id])
 
+  const updatedata = {
+    title : values.title,
+    content : values.content,
+    id : id
+  }
 
   const handleSave = async ()=>{
     if(values.title === '' || values.content === ''){
@@ -41,14 +49,13 @@ const Update = () => {
     }
     
     try {
-      const updatedata = await window.api.editNote({title : values.title , content : values.content , id : id})
+      const updatenote = dispatch(updateNote(updatedata))
 
-      if(updatedata.success){
+      if(updatenote){
         toast("Data Upated.")
-        console.log(updatedata.data)
         navigate('/notes')
       }else {
-        console.log(updatedata.error)
+        console.log("something wrong")
       }
     } catch (error) {
         console.error(error)

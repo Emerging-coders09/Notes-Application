@@ -1,59 +1,71 @@
-import React, { useState } from 'react'
-import toast from 'react-hot-toast'
-import { useNavigate } from 'react-router-dom'
-import '../Css/Login&Sign.css'
+import React, { useEffect, useState } from "react";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
+import "../Css/Login&Sign.css";
+import { useDispatch, useSelector } from "react-redux";
+import { CheckUserExist, RegisterUser } from "../redux/reducers/authReducer";
 
 const Sign = () => {
-    const navigate = useNavigate()
-    const [values , setValues] = useState({
-        name : '',
-        email : '',
-        password : '',
-        confirmPassword : ''
-    })
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const [values, setValues] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
 
-    const handleRegister = async ()=>{
-      try {
-        if (values.password !== values.confirmPassword) return toast.error("Passowrd and Confirm Password doesn't match")
+  const user = {
+    name : values.name ,
+    email : values.email,
+    password : values.password ,
+  }
 
-         const user = await window.api.getuser({email : values.email}) 
-         if(user.data){
-          return toast.error("User Already Exists")
-         }
-         
-        const register = await window.api.register({
-            name : values.name,
-            email : values.email,
-            password : values.password
-        })    
+  const userId = useSelector((state)=> state.auth.user)
 
-        console.log(register)
+  const handleRegister = () => {
+    try {
+      if (values.password !== values.confirmPassword)
+        return toast.error("Passowrd and Confirm Password doesn't match");
 
-        if(register.success){
-          console.log("User Added", register.data)
-          toast.success("Register Successfully")
-          navigate('/')
-        }else {
-          console.error("Error :" , register.error)
-          toast.error(register.error)
-        }
-      } catch (error) {
-        console.error(error)
+      
+      // const User = await window.api.getuser({ email: values.email });
+
+      console.log(userId)
+
+      if (userId) {
+        return toast.error("User Already Exists");
       }
+      dispatch(RegisterUser(user))
+
+      console.log(userId)
+      // const register = await window.api.register({
+      //   name: values.name,
+      //   email: values.email,
+      //   password: values.password,
+      // });
+
+
+      // if (register.success) {
+      //   toast.success("Register Successfully");
+      //   navigate("/");
+      // } else {
+      //   toast.error(register.error);
+      // }
+    } catch (error) {
+      console.error(error);
     }
+  };
 
   return (
     <div className="container">
-      
       <div className="box">
-        
         <div className="header">
           <h1 className="">Create Account</h1>
           <p className="">Start organizing your notes</p>
         </div>
 
         <div className="fields">
-          
           <div className="field">
             <label className="">Full Name</label>
             <input
@@ -61,7 +73,7 @@ const Sign = () => {
               placeholder="Enter your name"
               className=""
               required
-              onChange={(e)=> setValues({...values , name : e.target.value})}
+              onChange={(e) => setValues({ ...values, name: e.target.value })}
             />
           </div>
 
@@ -72,7 +84,7 @@ const Sign = () => {
               placeholder="Enter your email"
               className=""
               required
-              onChange={(e)=> setValues({...values , email : e.target.value})}
+              onChange={(e) => setValues({ ...values, email: e.target.value })}
             />
           </div>
 
@@ -83,7 +95,9 @@ const Sign = () => {
               placeholder="Create a password"
               className=""
               required
-              onChange={(e)=> setValues({...values , password : e.target.value})}
+              onChange={(e) =>
+                setValues({ ...values, password: e.target.value })
+              }
             />
           </div>
 
@@ -94,7 +108,9 @@ const Sign = () => {
               placeholder="Confirm your password"
               className=""
               required
-              onChange={(e)=> setValues({...values , confirmPassword : e.target.value})}
+              onChange={(e) =>
+                setValues({ ...values, confirmPassword: e.target.value })
+              }
             />
           </div>
 
@@ -104,15 +120,14 @@ const Sign = () => {
         </div>
 
         <p className="footer">
-          Already have an account? 
-          <button className="" onClick={()=> navigate('/')}>
+          Already have an account?
+          <button className="" onClick={() => navigate("/")}>
             Log in
           </button>
         </p>
-
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Sign
+export default Sign;

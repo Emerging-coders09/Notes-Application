@@ -2,7 +2,10 @@ import React, { use, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CircleX, Pencil, Recycle, Star, Trash, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
-import '../Css/Notes.css'
+import "../Css/Notes.css";
+import { useDispatch, useSelector } from "react-redux";
+import { deleteNote } from "../redux/reducers/notesReducer";
+import { logout } from "../redux/reducers/authReducer";
 
 const Notes = () => {
   const [search, setSearch] = useState("");
@@ -14,11 +17,15 @@ const Notes = () => {
   const [selectedNotes, setSelectedNotes] = useState([]);
   const [showConfirm, setShowConfirm] = useState(false);
   const [deleteid, setDeleteid] = useState(null);
+  const dispatch = useDispatch();
 
+  const userId = useSelector((state)=> state.auth.user)
   useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem("user"));
-    setUser(storedUser);
-  }, []);
+    if(userId){
+      setUser(userId)
+    }
+  }, [userId]);
+
   useEffect(() => {
     if (!user) return;
 
@@ -26,7 +33,6 @@ const Notes = () => {
       try {
         const notes = await window.api.getNotes({ user_id: user.id });
         setData(notes?.data || []);
-        console.log(data)
       } catch (error) {
         toast.error("Failed to fetch notes");
       }
@@ -71,21 +77,20 @@ const Notes = () => {
 
   const handleDelete = (id) => {
     setShowConfirm(true);
-    if(selectedNotes.length === 0){
-
+    if (selectedNotes.length === 0) {
       setDeleteid(id);
     }
   };
 
   const handleConfirmDelete = async () => {
     try {
-      const del = await window.api.deleteNote({ id: deleteid });
+      const deletenote = dispatch(deleteNote(deleteid))
 
-      if (del.success) {
+      if (deletenote) {
         toast.success("Note delete..");
         setData((prev) => prev.filter((note) => note.id !== deleteid));
       } else {
-        toast.error(del.error);
+        toast.error("Something wrong");
       }
     } catch (error) {
       toast.error(error);
@@ -148,56 +153,54 @@ const Notes = () => {
     } catch (error) {
       toast.error("Error :", error);
     }
-    setShowConfirm(false)
-    setDeleteid(null)
+    setShowConfirm(false);
+    setDeleteid(null);
   };
-  const handleMultipleRecycle = async ()=> {
-      try {
-        const res = await  window.api.recycleMultiple(selectedNotes)
-
-        if(res.success){
-          toast.success("Notes Moved to Recycle.")
-          setData((prev)=> 
-            prev.filter((note)=> !selectedNotes.includes(note.id)),
-          );
-          setSelectedNotes([])
-          setEdit(false)
-        } else {
-          toast.error(res.error)
-        }
-       } catch (error) {
-          toast.error(error)
-      }
-      setShowConfirm(false)
-      setDeleteid(null)
-  }
-
-  const handleRecycle = async ()=>{
+  const handleMultipleRecycle = async () => {
     try {
-      const res = await window.api.recyclebin({ id : deleteid})
+      const res = await window.api.recycleMultiple(selectedNotes);
+
+      if (res.success) {
+        toast.success("Notes Moved to Recycle.");
+        setData((prev) =>
+          prev.filter((note) => !selectedNotes.includes(note.id)),
+        );
+        setSelectedNotes([]);
+        setEdit(false);
+      } else {
+        toast.error(res.error);
+      }
+    } catch (error) {
+      toast.error(error);
+    }
+    setShowConfirm(false);
+    setDeleteid(null);
+  };
+
+  const handleRecycle = async () => {
+    try {
+      const res = await window.api.recyclebin({ id: deleteid });
       await window.api.unfavourite({
         user_id: user.id,
         id: deleteid,
       });
-      if(res.success){
-        toast.success("Moved to Recycled Bin")
+      if (res.success) {
+        toast.success("Moved to Recycled Bin");
         const notes = await window.api.getNotes({ user_id: user.id });
-        setData(notes?.data || [])
+        setData(notes?.data || []);
       }
-
     } catch (error) {
-      toast.error(res.error)
+      toast.error(res.error);
     }
 
     setShowConfirm(false);
     setDeleteid(null);
-
-  }
+  };
 
   const handleLogOut = () => {
-    localStorage.removeItem("user");
     toast.success("LoggedOut successfully");
     navigate("/");
+    dispatch(logout())
   };
 
   return (
@@ -207,40 +210,27 @@ const Notes = () => {
 
         <div className="user">
           <p className="">Logged in as</p>
-          <span className="">
-            {user?.name || "User"}
-          </span>
+          <span className="">{user?.name || "User"}</span>
         </div>
 
-        <button
-          className="Addbtn button"
-          onClick={() => navigate("/add")}
-        >
+        <button className="Addbtn button" onClick={() => navigate("/add")}>
           + Add Note
         </button>
 
         <div className="section">
-          <button className="button btn active-all">
-            All Notes
-          </button>
+          <button className="button btn active-all">All Notes</button>
           <button
             className=" button btn"
             onClick={() => navigate("/favourite")}
           >
             Favorites
           </button>
-          <button
-            className=" button btn"
-            onClick={() => navigate("/recycle")}
-          >
+          <button className=" button btn" onClick={() => navigate("/recycle")}>
             Recycle Bin
           </button>
         </div>
 
-        <button
-          className="logout button"
-          onClick={handleLogOut}
-        >
+        <button className="logout button" onClick={handleLogOut}>
           Log Out
         </button>
       </div>
@@ -273,9 +263,7 @@ const Notes = () => {
                     <option value="Newest">Newest</option>
                   </select>
 
-                  <div className="arrow">
-                    ▼
-                  </div>
+                  <div className="arrow">▼</div>
                 </div>
               </div>
             ) : (
@@ -284,13 +272,13 @@ const Notes = () => {
                   className="button btn-orange"
                   onClick={() => {
                     setEdit(true);
-                    setSelectedNotes([])
+                    setSelectedNotes([]);
                   }}
                 >
                   <CircleX size={20} stroke="white" />
                 </button>
-                <button className="button btn-red">
-                  <Trash2 size={20} stroke="white" onClick={handleDelete} />
+                <button className="button btn-red" onClick={handleDelete}>
+                  <Trash2 size={20} stroke="white" />
                 </button>
               </div>
             )}
@@ -343,7 +331,7 @@ const Notes = () => {
                         size={18}
                         fill={note.like === 1 ? "yellow" : "white"}
                         stroke="black"
-                      /> 
+                      />
                     </button>
 
                     <button
@@ -355,13 +343,9 @@ const Notes = () => {
                   </div>
                 ) : null}
 
-                <h3 className="title">
-                  {note.title}
-                </h3>
+                <h3 className="title">{note.title}</h3>
 
-                <p className="content">
-                  {note.content}
-                </p>
+                <p className="content">{note.content}</p>
               </div>
             ))}
           </div>
@@ -371,29 +355,35 @@ const Notes = () => {
         <div className="modal-overlay">
           <div className="modal-box ">
             <h3 className="">Delete this note?</h3>
-            <p className="">
-              This action cannot be undone.
-            </p>
+            <p className="">This action cannot be undone.</p>
 
             <div className=" modal-box-1">
               <button
                 onClick={() => setShowConfirm(false)}
                 className="btn-orange  modal-btn"
               >
-                <CircleX/>
+                <CircleX />
               </button>
 
               <button
-                onClick={selectedNotes.length === 0 ? handleConfirmDelete : multipleDelete}
+                onClick={
+                  selectedNotes.length === 0
+                    ? handleConfirmDelete
+                    : multipleDelete
+                }
                 className="btn-red modal-btn"
               >
-                <Trash /> 
+                <Trash />
               </button>
               <button
-                onClick={selectedNotes.length === 0 ? handleRecycle : handleMultipleRecycle}
+                onClick={
+                  selectedNotes.length === 0
+                    ? handleRecycle
+                    : handleMultipleRecycle
+                }
                 className="modal-btn btn-green"
               >
-                <Recycle /> 
+                <Recycle />
               </button>
             </div>
           </div>
