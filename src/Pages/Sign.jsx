@@ -2,12 +2,13 @@ import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import "../Css/Login&Sign.css";
-import { useDispatch, useSelector } from "react-redux";
-import { CheckUserExist, RegisterUser } from "../redux/reducers/authReducer";
+import { useDispatch } from "react-redux";
+import { RegisterUser } from "../redux/reducers/authReducer";
 
 const Sign = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  // const {  error } = useSelector((state) => state.auth);
   const [values, setValues] = useState({
     name: "",
     email: "",
@@ -15,43 +16,48 @@ const Sign = () => {
     confirmPassword: "",
   });
 
-  const user = {
-    name : values.name ,
-    email : values.email,
-    password : values.password ,
-  }
+  // useEffect(() => {
 
-  const userId = useSelector((state)=> state.auth.user)
+  //   if(error ) {
+  //     toast.error(error)
+  //   }
+  // }, [error]);
 
-  const handleRegister = () => {
+  const User = {
+    name: values.name,
+    email: values.email,
+    password: values.password,
+  };
+
+  // const userId = useSelector((state)=> state.auth.user)
+
+  const handleRegister = async () => {
+    if (
+      values.name === "" ||
+      values.email === "" ||
+      values.password === "" ||
+      values.confirmPassword === ""
+    )
+      return toast.error("Enter the fields");
+
     try {
       if (values.password !== values.confirmPassword)
         return toast.error("Passowrd and Confirm Password doesn't match");
 
-      
-      // const User = await window.api.getuser({ email: values.email });
+      const register = await window.api.register({
+        name: values.name,
+        email: values.email,
+        password: values.password,
+      });
 
-      console.log(userId)
-
-      if (userId) {
-        return toast.error("User Already Exists");
+      if (register.success) {
+        toast.success("Register Successfully");
+        dispatch(RegisterUser(User));
+        navigate("/");
+      } else {
+          toast.error(register.error || "User Already Exists");
+        
       }
-      dispatch(RegisterUser(user))
-
-      console.log(userId)
-      // const register = await window.api.register({
-      //   name: values.name,
-      //   email: values.email,
-      //   password: values.password,
-      // });
-
-
-      // if (register.success) {
-      //   toast.success("Register Successfully");
-      //   navigate("/");
-      // } else {
-      //   toast.error(register.error);
-      // }
     } catch (error) {
       console.error(error);
     }

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import toast from 'react-hot-toast'
 import { useSelector } from 'react-redux'
 import { Outlet, useNavigate } from 'react-router-dom'
@@ -8,10 +8,15 @@ const ProtectedRoutes = () => {
 
     const isAuthenticated = useSelector((state)=> state.auth.isAuthenticated)
 
-    if(!isAuthenticated){
-        toast.error("Please Login first.")
-        return navigate('/')
-    }
+    useEffect(()=>{
+        
+        if(!isAuthenticated){
+            toast.error("Please Login first.")
+            return navigate('/')
+        }
+
+    },[isAuthenticated])
+
     return <Outlet />
 }
 

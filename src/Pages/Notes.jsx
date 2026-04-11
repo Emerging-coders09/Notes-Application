@@ -1,16 +1,23 @@
-import React, { use, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CircleX, Pencil, Recycle, Star, Trash, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
 import "../Css/Notes.css";
 import { useDispatch, useSelector } from "react-redux";
-import { deleteNote } from "../redux/reducers/notesReducer";
+import {
+  clearAll,
+  deleteNote,
+  moveMultipleToRecycle,
+  moveToRecycle,
+  multipeRestore,
+  multipleDeleteNote,
+  toggleFavourite,
+} from "../redux/reducers/notesReducer";
 import { logout } from "../redux/reducers/authReducer";
 
 const Notes = () => {
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState("Sorting");
-  const [data, setData] = useState([]);
   const navigate = useNavigate();
   let [user, setUser] = useState(null);
   const [edit, setEdit] = useState(true);
@@ -18,27 +25,36 @@ const Notes = () => {
   const [showConfirm, setShowConfirm] = useState(false);
   const [deleteid, setDeleteid] = useState(null);
   const dispatch = useDispatch();
+  const data = useSelector((state) => state.note.notes.filter((note)=> note.recycle !== 'bin'));
 
-  const userId = useSelector((state)=> state.auth.user)
+  const userId = useSelector((state) => state.auth.user);
   useEffect(() => {
-    if(userId){
-      setUser(userId)
+    if (userId) {
+      setUser(userId);
     }
   }, [userId]);
 
   useEffect(() => {
-    if (!user) return;
+  if (!user) return;
 
-    async function fetchData() {
-      try {
-        const notes = await window.api.getNotes({ user_id: user.id });
-        setData(notes?.data || []);
-      } catch (error) {
-        toast.error("Failed to fetch notes");
+  const fetchNotes = async () => {
+    try {
+      const res = await window.api.getNotes({ user_id: user.id });
+
+      if (res.success) {
+        dispatch(getNotes(res.data)); // ✅ THIS IS KEY
+      } else {
+        toast.error(res.error);
       }
+
+    } catch (error) {
+      toast.error(error.message);
     }
-    fetchData();
-  }, [user]);
+  };
+
+  fetchNotes();
+}, [user]);
+
 
   const filteredData = useMemo(() => {
     let filterData = search.trim()
@@ -83,17 +99,20 @@ const Notes = () => {
   };
 
   const handleConfirmDelete = async () => {
+    console.log(deleteid);
     try {
-      const deletenote = dispatch(deleteNote(deleteid))
+      dispatch(deleteNote({ id: deleteid }));
 
-      if (deletenote) {
-        toast.success("Note delete..");
-        setData((prev) => prev.filter((note) => note.id !== deleteid));
+      const res = await window.api.deleteNote({ id: deleteid });
+      if (res.success) {
+        console.log("success on delete");
       } else {
-        toast.error("Something wrong");
+        console.log(res.error);
       }
+
+      toast.success("Note delete..");
     } catch (error) {
-      toast.error(error);
+      toast.error(error.message);
     }
     setShowConfirm(false);
     setDeleteid(null);
@@ -101,35 +120,21 @@ const Notes = () => {
 
   const handleFavourite = async (user_id, id, like) => {
     try {
-      if (like !== 1) {
-        const favourite = await window.api.favourite({
-          user_id: user_id,
-          id: id,
-        });
-        if (favourite.success) {
-          toast.success("Notes Added to favourite");
+      let newLike = like === 1 ? 0 : 1;
 
-          setData((prev) =>
-            prev.map((note) => (note.id === id ? { ...note, like: 1 } : note)),
-          );
-        } else {
-          toast.error(favourite.error);
-        }
+      const res =
+        like !== 1
+          ? await window.api.favourite({ user_id: user_id, id: id })
+          : await window.api.unfavourite({ user_id: user_id, id: id });
+
+      if (res.success) {
+        dispatch(toggleFavourite({ id: id, like: newLike }));
+
+        toast.success(
+          newLike === 1 ? "Added to Favourite" : "Removed from favourite",
+        );
       } else {
-        const getunfavourite = await window.api.unfavourite({
-          user_id: user_id,
-          id: id,
-        });
-
-        if (getunfavourite.success) {
-          toast.success("Notes deleted from favourite");
-
-          setData((prev) =>
-            prev.map((note) => (note.id === id ? { ...note, like: 0 } : note)),
-          );
-        } else {
-          toast.error(getunfavourite.error);
-        }
+        toast.error(res.error);
       }
     } catch (error) {
       toast.error(error.message || "Something went wrong");
@@ -141,10 +146,8 @@ const Notes = () => {
       const res = await window.api.deleteMultiple(selectedNotes);
 
       if (res.success) {
+        dispatch(multipleDeleteNote(selectedNotes))
         toast.success("Notes deleted.");
-        setData((prev) =>
-          prev.filter((note) => !selectedNotes.includes(note.id)),
-        );
         setSelectedNotes([]);
         setEdit(false);
       } else {
@@ -161,10 +164,8 @@ const Notes = () => {
       const res = await window.api.recycleMultiple(selectedNotes);
 
       if (res.success) {
+        dispatch(multipeRestore(selectedNotes))
         toast.success("Notes Moved to Recycle.");
-        setData((prev) =>
-          prev.filter((note) => !selectedNotes.includes(note.id)),
-        );
         setSelectedNotes([]);
         setEdit(false);
       } else {
@@ -185,12 +186,13 @@ const Notes = () => {
         id: deleteid,
       });
       if (res.success) {
+        dispatch(moveToRecycle({ id: deleteid }));
         toast.success("Moved to Recycled Bin");
-        const notes = await window.api.getNotes({ user_id: user.id });
-        setData(notes?.data || []);
+      } else {
+        toast.error(res.error);
       }
     } catch (error) {
-      toast.error(res.error);
+      toast.error(error.message);
     }
 
     setShowConfirm(false);
@@ -200,7 +202,8 @@ const Notes = () => {
   const handleLogOut = () => {
     toast.success("LoggedOut successfully");
     navigate("/");
-    dispatch(logout())
+    dispatch(logout());
+    dispatch(clearAll());
   };
 
   return (

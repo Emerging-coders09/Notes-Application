@@ -1,40 +1,40 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { CircleCheckBig, CircleX, Pencil, Star, Trash2 , Trash } from "lucide-react";
+import {
+  CircleCheckBig,
+  CircleX,
+  Pencil,
+  Star,
+  Trash2,
+  Trash,
+} from "lucide-react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
-import '../Css/Notes.css'
+import "../Css/Notes.css";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../redux/reducers/authReducer";
+import {
+  deleteNote,
+  multipeRestore,
+  multipleDeleteNote,
+  restoreFromRecycle,
+} from "../redux/reducers/notesReducer";
 
 const Recycle = () => {
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
   let [user, setUser] = useState(null);
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState("Sorting");
-  const [data, setData] = useState([]);
   const [edit, setEdit] = useState(true);
   const [selectedNotes, setSelectedNotes] = useState([]);
   const navigate = useNavigate();
-  const userId = useSelector((state)=> state.auth.user.data)
+  const userId = useSelector((state) => state.auth.user.data);
+  const data = useSelector((state)=> state.note.notes)
+  console.log(data)
   useEffect(() => {
-    if(userId){
-
-      setUser(userId)
+    if (userId) {
+      setUser(userId);
     }
   }, [userId]);
-  useEffect(() => {
-    if (!user) return;
-
-    async function fetchData() {
-      try {
-        const notes = await window.api.getrecycle({ user_id: user.id });
-        setData(notes?.data || []);
-      } catch (error) {
-        toast.error("Failed to fetch notes");
-      }
-    }
-    fetchData();
-  }, [user]);
 
   const filteredData = useMemo(() => {
     let filterData = search.trim()
@@ -76,10 +76,8 @@ const Recycle = () => {
       const res = await window.api.deleteMultiple(selectedNotes);
 
       if (res.success) {
+        dispatch(multipleDeleteNote(selectedNotes));
         toast.success("Notes deleted.");
-        setData((prev) =>
-          prev.filter((note) => !selectedNotes.includes(note.id)),
-        );
         setSelectedNotes([]);
         setEdit(false);
       } else {
@@ -88,59 +86,71 @@ const Recycle = () => {
     } catch (error) {
       toast.error("Error :", error.message);
     }
-
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = (id) => {
     try {
-      const del = await window.api.deleteNote({ id: id });
+      dispatch(deleteNote({ id: id }));
 
-      if (del.success) {
-        toast.success("Note delete..");
-        setData((prev) => prev.filter((note) => note.id !== id));
+      toast.success("Note delete..");
+      data.filter((note) => note.id !== id);
+      DeleteData();
+    } catch (error) {
+      toast.error(error || "something wrong");
+    }
+  };
+
+  const DeleteData = async () => {
+    try {
+      const res = await window.api.deleteNote({ id: id });
+      if (res.success) {
+        dispatch(deleteNote({ id: id }));
+        toast.success("Deleted Permantly");
       } else {
-        toast.error(del.error);
+        console.log(res.error);
       }
     } catch (error) {
-      toast.error(error.message);
+      console.error(error);
     }
+    setShowConfirm(false);
+    setDeleteid(null);
   };
 
-  const handleRecover = async (id ) => {
-        try {
-            const recover = await window.api.recover({ id : id})
-
-            if(recover.success){
-                toast.success("Note recovered..")
-                setData((prev)=> prev.filter((note)=> note.id !== id))
-            } else {
-                toast.error(recover.error)
-            }
-        } catch (error) {
-            toast.error(error)
-        }
-  };
-  const multipleRecycle = async ()=>{
+  const handleRecover = async (id) => {
     try {
-        const recoverMulitple = await window.api.recoverMultiple(selectedNotes)
+      const recover = await window.api.recover({ id: id });
 
-        if(recoverMulitple.success){
-          toast.success("Notes Recoverd..")
-          setData((prev)=> prev.filter((note)=> !selectedNotes.includes(note.id)))
-          setSelectedNotes([])
-          setEdit(false)
-        }else {
-          toast.error(recoverMulitple.error)
-        }
+      if (recover.success) {
+        dispatch(restoreFromRecycle({ id: id }));
+        toast.success("Note recovered..");
+      } else {
+        toast.error(recover.error);
+      }
     } catch (error) {
-        toast.error(error)
+      toast.error(error);
     }
-  }
+  };
+  const multipleRecycle = async () => {
+    try {
+      const recoverMulitple = await window.api.recoverMultiple(selectedNotes);
+
+      if (recoverMulitple.success) {
+        dispatch(multipeRestore(selectedNotes));
+        toast.success("Notes Recoverd..");
+        setSelectedNotes([]);
+        setEdit(false);
+      } else {
+        toast.error(recoverMulitple.error);
+      }
+    } catch (error) {
+      toast.error(error);
+    }
+  };
 
   const handleLogOut = () => {
     toast.success("LoggedOut successfully");
     navigate("/");
-    dispatch(logout())
+    dispatch(logout());
   };
 
   return (
@@ -150,29 +160,18 @@ const Recycle = () => {
 
         <div className="user">
           <p className="">Logged in as</p>
-          <span className="">
-            {user?.name || "User"}
-          </span>
+          <span className="">{user?.name || "User"}</span>
         </div>
 
-        <button
-          className="button Addbtn"
-          onClick={() => navigate("/add")}
-        >
+        <button className="button Addbtn" onClick={() => navigate("/add")}>
           + Add Note
         </button>
 
         <div className="section">
-          <button
-            className="button btn"
-            onClick={() => navigate("/notes")}
-          >
+          <button className="button btn" onClick={() => navigate("/notes")}>
             All Notes
           </button>
-          <button
-            className="button btn"
-            onClick={() => navigate("/favourite")}
-          >
+          <button className="button btn" onClick={() => navigate("/favourite")}>
             Favorites
           </button>
           <button
@@ -183,18 +182,13 @@ const Recycle = () => {
           </button>
         </div>
 
-        <button
-          className="button logout"
-          onClick={handleLogOut}
-        >
+        <button className="button logout" onClick={handleLogOut}>
           Log Out
         </button>
       </div>
       <div className="Home">
         <div className="top">
-          <h2 className="">
-            Recycle Bin 👋
-          </h2>
+          <h2 className="">Recycle Bin 👋</h2>
 
           <div className="left-top">
             {edit ? (
@@ -220,9 +214,7 @@ const Recycle = () => {
                     <option value="Newest">Newest</option>
                   </select>
 
-                  <div className="arrow">
-                    ▼
-                  </div>
+                  <div className="arrow">▼</div>
                 </div>
               </div>
             ) : (
@@ -231,13 +223,13 @@ const Recycle = () => {
                   className="button btn-orange"
                   onClick={() => {
                     setEdit(true);
-                    setSelectedNotes([])
+                    setSelectedNotes([]);
                   }}
                 >
                   <CircleX size={20} stroke="white" />
                 </button>
                 <button className="button btn-red" onClick={multipleDelete}>
-                  <Trash2 size={20} stroke="white"  />
+                  <Trash2 size={20} stroke="white" />
                 </button>
                 <button className="button btn-green" onClick={multipleRecycle}>
                   <CircleCheckBig size={16} stroke="white" />
@@ -277,8 +269,6 @@ const Recycle = () => {
                 />
                 {edit ? (
                   <div className="fnbtn">
-                    
-
                     <button
                       className="button recoverbtn"
                       onClick={() => handleRecover(note.id)}
@@ -294,13 +284,9 @@ const Recycle = () => {
                   </div>
                 ) : null}
 
-                <h3 className="title">
-                  {note.title}
-                </h3>
+                <h3 className="title">{note.title}</h3>
 
-                <p className="content">
-                  {note.content}
-                </p>
+                <p className="content">{note.content}</p>
               </div>
             ))}
           </div>

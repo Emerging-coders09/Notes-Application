@@ -11,34 +11,32 @@ const Add = () => {
   const navigate = useNavigate()
   const [title , setTitle] = useState('')
   const [content , setContent] = useState("")
-  const userId = useSelector((state)=> state.auth.user.data)
+  const userId = useSelector((state)=> state.auth.user)
   
+  const adduser = {
+    user_id : userId.id,
+    title : title,
+    content : content
+  }
   const handleSave = async ()=>{
     if(title === '' || content === ''){
       return toast.error("Enter both fields")
     }
     try {
-
-      const adduser = {
-        user_id : userId.id,
-        title : title,
-        content : content
-      }
-      // const User = JSON.parse(localStorage.getItem("user"))
-      // const addata = await window.api.addNote({
-      //   user_id : userId.id,
-      //   title : title,
-      //   content : content
-      // })
-      const addata = dispatch(addNote(adduser))
+      dispatch(addNote(adduser))
       
-      if(addata){
-        toast.success("Note saved successfully 🎉")
+      toast.success("Note saved successfully 🎉")
+      AddNoteData()
         navigate('/notes')
-        
-      }else {
-        console.log("Error : " , addata.error)
-      }
+    } catch (error) {
+      console.error(error || "Something wrong")
+    }
+  }
+
+  const AddNoteData = async ()=>{
+    try {
+        await window.api.addNote(adduser)
+
     } catch (error) {
       console.error(error)
     }

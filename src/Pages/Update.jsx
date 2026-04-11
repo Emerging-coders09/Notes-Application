@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import { useNavigate, useParams } from 'react-router-dom'
 import '../Css/Add&Update.css'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { updateNote } from '../redux/reducers/notesReducer'
 
 const Update = () => {
@@ -13,52 +13,47 @@ const Update = () => {
     title : "",
     content : ''
   })
+  const data = useSelector((state)=> state.note.notes)
+  const Specificnote = data.find((note)=> note.id === Number(id))
 
   useEffect(()=>{
-    async function fetchData(){
-      try {
-        const data = await window.api.getNotebyid({id : id})
-        if(data.success){
-
-          console.log(data.data)
-          setValues({
-            title : data.data.title,
-            content : data.data.content
-          })
-        }else {
-          console.log(data.error)
-        }
-
-      } catch (error) {
-        console.error(error)
-      }
-    }
-
-    fetchData()
+    
+    setValues({
+      title : Specificnote.title,
+      content : Specificnote.content
+    })
   },[id])
 
   const updatedata = {
+    id : id,
     title : values.title,
-    content : values.content,
-    id : id
+    content : values.content
   }
 
-  const handleSave = async ()=>{
+  const handleSave = ()=>{
     if(values.title === '' || values.content === ''){
       return toast.error("Enter both fields")
     }
-    
     try {
-      const updatenote = dispatch(updateNote(updatedata))
-
-      if(updatenote){
-        toast("Data Upated.")
+        dispatch(updateNote(updatedata))
+        UpdateData()
         navigate('/notes')
-      }else {
-        console.log("something wrong")
-      }
+        console.log(updatedata)
     } catch (error) {
         console.error(error)
+    }
+  }
+
+  const UpdateData = async ()=>{
+    try {
+      const res = await window.api.editNote(updatedata)
+      if(res.success){
+        toast("Data Upated.")
+      }else{
+        console.log(res.error)
+      }
+    } catch (error) {
+      console.error(error)
     }
   }
 

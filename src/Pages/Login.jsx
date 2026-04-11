@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import "../Css/Login&Sign.css";
 import { useDispatch, useSelector } from "react-redux";
-import {  loginUser } from "../redux/reducers/authReducer";
+import { login, LoginUser } from "../redux/reducers/authReducer";
+import { getNotes } from "../redux/reducers/notesReducer";
 
 const Login = () => {
   const dispatch = useDispatch();
@@ -13,34 +14,48 @@ const Login = () => {
     password: "",
   });
 
-  const User = {
-    email : values.email,
-    password : values.password
-  }
+  const loginUser = useSelector((state)=> state.auth.user)
 
-  const userId = useSelector((state)=> state.auth.user)
+  useEffect(()=>{
+    if(loginUser?.id){
+      GetNotes(loginUser.id)
+      console.log(loginUser)
+    }
+  }, [loginUser])
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!values.email || !values.password) {
       return toast.error("Please fill all fields");
     }
     try {
-       dispatch(loginUser(User));
-      // const data = await window.api.login({
-      //   email: values.email,
-      //   password: values.password,
-      // });
-      console.log(userId)
-      if (userId) {
-        toast.success("Login Successfully");
-        navigate("/notes");
+      const res = await window.api.login({email : values.email , password : values.password})
+
+      if(res.success){
+        dispatch(LoginUser(res.data))
+        dispatch(login())
+         toast.success("Login Successfully")
+         GetNotes(res.data.id) 
+         navigate("/notes");
       } else {
-        toast.error(userId.error || "User not Found");
+        toast.error("User not found")
       }
     } catch (error) {
-      console.error(error);
+      console.log(error)
     }
   };
+
+  const GetNotes = async (user)=>{
+    try {
+      const res = await window.api.getNotes({user_id : user})
+      if(res.success){
+        dispatch(getNotes(res.data))
+      }else {
+        console.log(res.error)
+      }
+    } catch (error) {
+      console.error(error) 
+    }
+  }
 
   return (
     <div className="container">

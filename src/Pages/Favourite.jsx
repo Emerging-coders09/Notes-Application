@@ -5,18 +5,28 @@ import toast from "react-hot-toast";
 import "../Css/Notes.css";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../redux/reducers/authReducer";
+import {
+  deleteNote,
+  moveMultipleToRecycle,
+  moveToRecycle,
+  multipleDeleteNote,
+  toggleFavourite,
+} from "../redux/reducers/notesReducer";
 
 const Favourite = () => {
   const navigate = useNavigate();
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState("Sorting");
-  const [data, setData] = useState([]);
   let [user, setUser] = useState(null);
   const [edit, setEdit] = useState(true);
   const [selectedNotes, setSelectedNotes] = useState([]);
   const [showConfirm, setShowConfirm] = useState(false);
   const [deleteid, setDeleteid] = useState(null);
+  const data = useSelector((state) =>
+    state.note.notes.filter((note) => note.recyle !== "bin"),
+  );
+  const favouritedata = data.filter((note) => note.like === 1);
 
   const userId = useSelector((state) => state.auth.user.data);
   useEffect(() => {
@@ -24,15 +34,6 @@ const Favourite = () => {
       setUser(userId);
     }
   }, [userId]);
-  useEffect(() => {
-    if (!user) return;
-
-    async function fetchData() {
-      const notes = await window.api.getfavourite({ user_id: user.id });
-      setData(notes.data);
-    }
-    fetchData();
-  }, [user]);
 
   const handleDelete = (id) => {
     setShowConfirm(true);
@@ -40,30 +41,42 @@ const Favourite = () => {
       setDeleteid(id);
     }
   };
-  const handleConfirmDelete = async () => {
+  const handleConfirmDelete = () => {
+    console.log(deleteid);
     try {
-      const del = await window.api.deleteNote({ id: deleteid });
+      dispatch(deleteNote({ id: deleteid }));
 
-      if (del.success) {
-        toast.success("Note delete..");
-        setData((prev) => prev.filter((note) => note.id !== deleteid));
+      toast.success("Note delete..");
+      data.filter((note) => note.id !== deleteid);
+      DeleteData();
+    } catch (error) {
+      toast.error(error || "something wrong");
+    }
+  };
+
+  const DeleteData = async () => {
+    try {
+      const res = await window.api.deleteNote({ id: deleteid });
+      if (res.success) {
+        dispatch(deleteNote({id : deleteid}))
+        console.log("success on delete");
       } else {
-        toast.error(del.error);
+        console.log(res.error);
       }
     } catch (error) {
-      toast.error(error);
+      console.error(error);
     }
     setShowConfirm(false);
     setDeleteid(null);
   };
   const filteredData = useMemo(() => {
     let filterData = search.trim()
-      ? data.filter(
+      ? favouritedata.filter(
           (note) =>
             note.title.toLowerCase().includes(search.toLowerCase()) ||
             note.content.toLowerCase().includes(search.toLowerCase()),
         )
-      : data;
+      : favouritedata;
 
     switch (sort) {
       case "Sorting":
@@ -81,19 +94,19 @@ const Favourite = () => {
       default:
         return filterData;
     }
-  }, [search, data, sort]);
+  }, [search, favouritedata, sort]);
 
   const handleFavourite = async (user_id, id) => {
     try {
-      const getunfavourite = await window.api.unfavourite({
+      const res = await window.api.unfavourite({
         user_id: user_id,
         id: id,
       });
-      setData(data.filter((note) => note.id !== id));
-      if (getunfavourite.success) {
+      if (res.success) {
+        dispatch(toggleFavourite({ user_id: user_id, id: id }));
         toast.success("Notes deleted from favourite");
       } else {
-        toast.error(getunfavourite.error);
+        toast.error(res.error);
       }
     } catch (error) {
       toast.error("Catch error :", error);
@@ -113,10 +126,9 @@ const Favourite = () => {
       const res = await window.api.deleteMultiple(selectedNotes);
 
       if (res.success) {
+        dispatch(multipleDeleteNote(selectedNotes));
         toast.success("Notes deleted.");
-        setData((prev) =>
-          prev.filter((note) => !selectedNotes.includes(note.id)),
-        );
+
         setSelectedNotes([]);
         setEdit(false);
       } else {
@@ -133,10 +145,8 @@ const Favourite = () => {
       const res = await window.api.recycleMultiple(selectedNotes);
 
       if (res.success) {
+        dispatch(moveMultipleToRecycle(selectedNotes))
         toast.success("Notes Moved to Recycle.");
-        setData((prev) =>
-          prev.filter((note) => !selectedNotes.includes(note.id)),
-        );
         setSelectedNotes([]);
         setEdit(false);
       } else {
@@ -157,9 +167,8 @@ const Favourite = () => {
         id: deleteid,
       });
       if (res.success) {
+        dispatch(moveToRecycle({id : deleteid}))
         toast.success("Moved to Recycled Bin");
-        const notes = await window.api.getfavourite({ user_id: user.id });
-        setData(notes?.data || []);
       }
     } catch (error) {
       toast.error(res.error);
@@ -172,7 +181,7 @@ const Favourite = () => {
   const handleLogOut = () => {
     toast.success("LoggedOut successfully");
     navigate("/");
-    dispatch(logout())
+    dispatch(logout());
   };
 
   return (

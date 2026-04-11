@@ -94,7 +94,6 @@ ipcMain.handle("login", async (event, user) => {
       data: data,
     };
   } catch (error) {
-    console.error(error);
     return {
       success: false,
       error: error.message,
