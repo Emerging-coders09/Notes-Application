@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import toast from "react-hot-toast";
 import { ArrowLeft, Save } from "lucide-react";
@@ -18,7 +18,21 @@ const Add = () => {
     title : title,
     content : content
   }
-  const handleSave = async ()=>{
+
+  useEffect(()=>{
+    const handlekeydown = (e)=>{
+      if(e.ctrlKey && e.key.toLowerCase() === 'c'){
+        navigate('/notes')
+      }
+      
+    }
+
+    window.addEventListener('keydown' , handlekeydown)
+    return ()=> window.removeEventListener('keydown' , handlekeydown)
+  },[])
+  const handleSave = async (e)=>{
+    e.preventDefault()
+    
     if(title === '' || content === ''){
       return toast.error("Enter both fields")
     }
@@ -45,7 +59,7 @@ const Add = () => {
   return (
     <div className="container">
 
-      <div className="box-container">
+      <form className="box-container" onSubmit={handleSave}>
 
         <div className="header">
           <h1 className="">New Note</h1>
@@ -81,7 +95,7 @@ const Add = () => {
           <span className="">Autosaved locally</span>
 
           <button
-            onClick={handleSave}
+            type='submit'
             className="addbtn"
           >
             <Save size={16} />
@@ -89,7 +103,7 @@ const Add = () => {
           </button>
         </div>
 
-      </div>
+      </form>
     </div>
   )
 }

@@ -96,5 +96,11 @@
     color: #2b7fff;
     cursor: pointer;
     margin-left: 3px;
-
+    transition: 0.3s ease-in;
 }   
+.box .footer button:hover{
+    text-decoration: underline;
+}
+.box .footer button:focus{
+    text-decoration: underline;
+}

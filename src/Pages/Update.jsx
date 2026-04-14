@@ -24,6 +24,18 @@ const Update = () => {
     })
   },[id])
 
+    useEffect(()=>{
+      const handlekeydown = (e)=>{
+        if(e.ctrlKey && e.key.toLowerCase() === 'c'){
+          navigate('/notes')
+        }
+        
+      }
+  
+      window.addEventListener('keydown' , handlekeydown)
+      return ()=> window.removeEventListener('keydown' , handlekeydown)
+    },[])
+
   const updatedata = {
     id : id,
     title : values.title,

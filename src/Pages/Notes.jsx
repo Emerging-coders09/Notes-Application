@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CircleX, Pencil, Recycle, Star, Trash, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   clearAll,
   deleteNote,
+  getNotes,
   moveMultipleToRecycle,
   moveToRecycle,
   multipeRestore,
@@ -22,39 +23,87 @@ const Notes = () => {
   let [user, setUser] = useState(null);
   const [edit, setEdit] = useState(true);
   const [selectedNotes, setSelectedNotes] = useState([]);
+  const [selectedIndex, setSelectedIndex] = useState(0);
   const [showConfirm, setShowConfirm] = useState(false);
   const [deleteid, setDeleteid] = useState(null);
   const dispatch = useDispatch();
-  const data = useSelector((state) => state.note.notes.filter((note)=> note.recycle !== 'bin'));
-
+  const searchRef = useRef(null)
+  const notes = useSelector((state) => state.note.notes);
+  const data = useMemo(() => {
+    return notes.filter((note) => note.recycle !== "bin");
+  }, [notes]);
   const userId = useSelector((state) => state.auth.user);
   useEffect(() => {
-    if (userId) {
-      setUser(userId);
+    if (userId?.id) {
+      fetchNotes(userId.id);
     }
   }, [userId]);
 
-  useEffect(() => {
-  if (!user) return;
-
-  const fetchNotes = async () => {
+  const fetchNotes = async (id) => {
     try {
-      const res = await window.api.getNotes({ user_id: user.id });
+      const res = await window.api.getNotes({ user_id: id });
 
       if (res.success) {
-        dispatch(getNotes(res.data)); // ✅ THIS IS KEY
+        dispatch(getNotes(res.data));
       } else {
         toast.error(res.error);
       }
-
     } catch (error) {
       toast.error(error.message);
     }
   };
 
-  fetchNotes();
-}, [user]);
+  useEffect(() => {
+    const handlekeydown = (e) => {
+      if (["INPUT", "TEXTAREA"].includes(e.target.tagName)) return;
 
+      if (e.ctrlKey || e.key === "F11") {
+        e.preventDefault();
+      }
+
+      if (e.ctrlKey && e.key.toLowerCase() === "n") {
+        navigate("/add");
+      }
+      if (e.ctrlKey && e.key.toLowerCase() === "l") {
+        handleLogOut();
+      }
+      if (e.key === "F11" && selectedNote) {
+        handleFavourite(
+          selectedNote.user_id,
+          selectedNote.id,
+          selectedNote.like,
+        );
+      }
+      if (e.ctrlKey && e.key === "Delete" && selectedNote) {
+        setDeleteid(selectedNote.id);
+        setShowConfirm(true);
+      }
+
+      if (e.ctrlKey && e.key === "ArrowRight" && selectedNote) {
+        navigate(`/update/${selectedNote.id}`);
+      }
+      if (e.ctrlKey && e.key === "Enter" && selectedNote) {
+        toggleSelect(selectedNote.id);
+      }
+
+      if (e.key === "ArrowDown") {
+        setSelectedIndex((prev) =>
+          prev < filteredData.length - 1 ? prev + 1 : prev,
+        );
+      }
+
+      if (e.ctrlKey && e.key.toLowerCase() === "s") {
+        e.preventDefault()
+
+        if(searchRef.current){
+          searchRef.current.focus();
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handlekeydown);
+    return () => window.removeEventListener("keydown", handlekeydown);
+  }, []);
 
   const filteredData = useMemo(() => {
     let filterData = search.trim()
@@ -91,6 +140,7 @@ const Notes = () => {
     );
   };
 
+  const selectedNote = filteredData[selectedIndex];
   const handleDelete = (id) => {
     setShowConfirm(true);
     if (selectedNotes.length === 0) {
@@ -146,7 +196,7 @@ const Notes = () => {
       const res = await window.api.deleteMultiple(selectedNotes);
 
       if (res.success) {
-        dispatch(multipleDeleteNote(selectedNotes))
+        dispatch(multipleDeleteNote(selectedNotes));
         toast.success("Notes deleted.");
         setSelectedNotes([]);
         setEdit(false);
@@ -164,7 +214,7 @@ const Notes = () => {
       const res = await window.api.recycleMultiple(selectedNotes);
 
       if (res.success) {
-        dispatch(multipeRestore(selectedNotes))
+        dispatch(moveMultipleToRecycle(selectedNotes));
         toast.success("Notes Moved to Recycle.");
         setSelectedNotes([]);
         setEdit(false);
@@ -181,10 +231,6 @@ const Notes = () => {
   const handleRecycle = async () => {
     try {
       const res = await window.api.recyclebin({ id: deleteid });
-      await window.api.unfavourite({
-        user_id: user.id,
-        id: deleteid,
-      });
       if (res.success) {
         dispatch(moveToRecycle({ id: deleteid }));
         toast.success("Moved to Recycled Bin");
@@ -213,7 +259,7 @@ const Notes = () => {
 
         <div className="user">
           <p className="">Logged in as</p>
-          <span className="">{user?.name || "User"}</span>
+          <span className="">{userId?.name || "User"}</span>
         </div>
 
         <button className="Addbtn button" onClick={() => navigate("/add")}>
@@ -290,6 +336,7 @@ const Notes = () => {
               type="text"
               placeholder="Search notes..."
               className="search"
+              ref={searchRef}
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
@@ -302,11 +349,11 @@ const Notes = () => {
           </div>
         ) : (
           <div className="data">
-            {filteredData.map((note) => (
-              <div
+            {filteredData.map((note, index) => (
+              <button
                 key={note.id}
                 onClick={() => !edit && toggleSelect(note.id)}
-                className={`note ${selectedNotes.includes(note.id) ? "selected" : ""}`}
+                className={`note ${selectedNotes.includes(note.id) ? "selected" : ""} {${index === selectedIndex ? "active-note" : ""}`}
               >
                 <input
                   type="checkbox"
@@ -318,14 +365,14 @@ const Notes = () => {
                 />
                 {edit ? (
                   <div className="fnbtn">
-                    <button
-                      className="button editbtn"
+                    <span
+                      className="ftnbutton editbtn"
                       onClick={() => navigate(`/update/${note.id}`)}
                     >
                       <Pencil size={16} />
-                    </button>
-                    <button
-                      className="button"
+                    </span>
+                    <span
+                      className="ftnbutton"
                       onClick={() =>
                         handleFavourite(note.user_id, note.id, note.like)
                       }
@@ -335,21 +382,21 @@ const Notes = () => {
                         fill={note.like === 1 ? "yellow" : "white"}
                         stroke="black"
                       />
-                    </button>
+                    </span>
 
-                    <button
-                      className="button deletebtn"
+                    <span
+                      className="ftnbutton deletebtn"
                       onClick={() => handleDelete(note.id)}
                     >
                       <Trash2 size={16} />
-                    </button>
+                    </span>
                   </div>
                 ) : null}
 
                 <h3 className="title">{note.title}</h3>
 
                 <p className="content">{note.content}</p>
-              </div>
+              </button>
             ))}
           </div>
         )}

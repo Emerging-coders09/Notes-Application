@@ -3,9 +3,7 @@ import {
   CircleCheckBig,
   CircleX,
   Pencil,
-  Star,
   Trash2,
-  Trash,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
@@ -21,20 +19,22 @@ import {
 
 const Recycle = () => {
   const dispatch = useDispatch();
-  let [user, setUser] = useState(null);
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState("Sorting");
   const [edit, setEdit] = useState(true);
   const [selectedNotes, setSelectedNotes] = useState([]);
   const navigate = useNavigate();
-  const userId = useSelector((state) => state.auth.user.data);
-  const data = useSelector((state)=> state.note.notes)
-  console.log(data)
+  const user = useSelector((state) => state.auth.user);
+  const notes = useSelector((state)=> state.note.notes)
+  const data = useMemo(()=>{
+    return notes.filter((note)=> note.recycle === 'bin')
+  }, [notes])
   useEffect(() => {
-    if (userId) {
-      setUser(userId);
+    if (user) {
+      console.log(notes)
     }
-  }, [userId]);
+  }, [user]);
+
 
   const filteredData = useMemo(() => {
     let filterData = search.trim()
@@ -94,13 +94,13 @@ const Recycle = () => {
 
       toast.success("Note delete..");
       data.filter((note) => note.id !== id);
-      DeleteData();
+      DeleteData(id);
     } catch (error) {
       toast.error(error || "something wrong");
     }
   };
 
-  const DeleteData = async () => {
+  const DeleteData = async (id) => {
     try {
       const res = await window.api.deleteNote({ id: id });
       if (res.success) {
@@ -269,18 +269,18 @@ const Recycle = () => {
                 />
                 {edit ? (
                   <div className="fnbtn">
-                    <button
+                    <span
                       className="button recoverbtn"
                       onClick={() => handleRecover(note.id)}
                     >
                       <CircleCheckBig size={16} />
-                    </button>
-                    <button
+                    </span>
+                    <span
                       className="button deletebtn"
                       onClick={() => handleDelete(note.id)}
                     >
                       <Trash2 size={16} />
-                    </button>
+                    </span>
                   </div>
                 ) : null}
 

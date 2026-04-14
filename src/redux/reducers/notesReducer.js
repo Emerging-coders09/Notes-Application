@@ -32,6 +32,7 @@ const noteSlice = createSlice({
     },
     clearAll: (state, action) => {
       state.notes = [];
+      state.error = null
     },
     toggleFavourite: (state, action) => {
       const { id, like } = action.payload;
@@ -41,19 +42,11 @@ const noteSlice = createSlice({
       }
     },
     moveToRecycle: (state, action) => {
-      const { id } = action.payload;
-      const note = state.notes.find((note) => note.id === Number(id));
-      if (note) {
-        note.reycle = "bin";
-      }
+      state.notes = state.notes.map((note)=> note.id === action.payload.id ? {...note , recycle : 'bin', like : 0} : note )
     },
     moveMultipleToRecycle: (state, action) => {
       const ids = action.payload;   
-     state.notes.forEach(note => {
-        if(ids.includes(note.id)){
-            note.recycle = 'bin'
-        }
-     })
+      state.notes = state.notes.map((note)=> ids.includes(note.id) ? {...note , recycle : 'bin' , like : 0} : note)
         
     },
     restoreFromRecycle: (state, action) => {

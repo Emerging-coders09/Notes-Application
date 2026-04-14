@@ -6,12 +6,15 @@ import { Outlet, useNavigate } from 'react-router-dom'
 const ProtectedRoutes = () => {
     const navigate = useNavigate()
 
-    const isAuthenticated = useSelector((state)=> state.auth.isAuthenticated)
+    const {isAuthenticated , justLoggedOut} = useSelector((state)=> state.auth)
 
     useEffect(()=>{
         
         if(!isAuthenticated){
-            toast.error("Please Login first.")
+            if(!justLoggedOut){
+
+                toast.error("Please Login first.")
+            }
             return navigate('/')
         }
 

@@ -10,6 +10,7 @@ import { Toaster } from "react-hot-toast";
 import Favourite from './Pages/Favourite'
 import Recycle from './Pages/Recycle'
 import ProtectedRoutes from './ProtectedRoutes'
+import "bootstrap/dist/css/bootstrap.min.css";
 
 const App = () => {
   return (

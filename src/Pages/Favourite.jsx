@@ -23,12 +23,12 @@ const Favourite = () => {
   const [selectedNotes, setSelectedNotes] = useState([]);
   const [showConfirm, setShowConfirm] = useState(false);
   const [deleteid, setDeleteid] = useState(null);
-  const data = useSelector((state) =>
-    state.note.notes.filter((note) => note.recyle !== "bin"),
-  );
-  const favouritedata = data.filter((note) => note.like === 1);
+  const notes = useSelector((state)=> state.note.notes)
+    const data = useMemo(()=>{
+      return notes.filter((note)=> note.like === 1)
+    },[notes])
 
-  const userId = useSelector((state) => state.auth.user.data);
+  const userId = useSelector((state) => state.auth.user);
   useEffect(() => {
     if (userId) {
       setUser(userId);
@@ -71,12 +71,12 @@ const Favourite = () => {
   };
   const filteredData = useMemo(() => {
     let filterData = search.trim()
-      ? favouritedata.filter(
+      ? data.filter(
           (note) =>
             note.title.toLowerCase().includes(search.toLowerCase()) ||
             note.content.toLowerCase().includes(search.toLowerCase()),
         )
-      : favouritedata;
+      : data;
 
     switch (sort) {
       case "Sorting":
@@ -94,7 +94,7 @@ const Favourite = () => {
       default:
         return filterData;
     }
-  }, [search, favouritedata, sort]);
+  }, [search, data, sort]);
 
   const handleFavourite = async (user_id, id) => {
     try {
@@ -291,13 +291,13 @@ const Favourite = () => {
                 />
                 {edit ? (
                   <div className="fnbtn">
-                    <button
+                    <span
                       className="button editbtn"
                       onClick={() => navigate(`/update/${note.id}`)}
                     >
                       <Pencil size={16} />
-                    </button>
-                    <button
+                    </span>
+                    <span
                       className="button"
                       onClick={() =>
                         handleFavourite(note.user_id, note.id, note.like)
@@ -308,14 +308,14 @@ const Favourite = () => {
                         fill={note.like === 1 ? "yellow" : "white"}
                         stroke="black"
                       />
-                    </button>
+                    </span>
 
-                    <button
+                    <span
                       className="button deletebtn"
                       onClick={() => handleDelete(note.id)}
                     >
                       <Trash2 size={16} />
-                    </button>
+                    </span>
                   </div>
                 ) : null}
 

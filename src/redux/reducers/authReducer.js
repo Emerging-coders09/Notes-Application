@@ -36,6 +36,7 @@ const authSlice = createSlice({
   name: "auth",
   initialState: {
     isAuthenticated: false,
+    justLoggedOut: false,
     user : null,
     error : null,
     newUser : null
@@ -44,11 +45,13 @@ const authSlice = createSlice({
     login: (state, action) => {
       state.isAuthenticated = true;
       state.error = null
+      state.justLoggedOut = false
     },
     logout: (state, action) => {
       state.isAuthenticated = false;
       state.user = null
       state.newUser = null
+      state.justLoggedOut = true
     },
     LoginUser : (state , action)=>{
         state.user = action.payload

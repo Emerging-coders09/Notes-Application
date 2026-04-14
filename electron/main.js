@@ -2,6 +2,7 @@ import { app, BrowserWindow, ipcMain } from "electron";
 import path from "path";
 import { fileURLToPath } from "url";
 import Database from "better-sqlite3";
+import { error } from "console";
 let win;
 
 const __filename = fileURLToPath(import.meta.url);
@@ -50,7 +51,6 @@ db.exec(
     `,
 );
 
-
 ipcMain.handle("register", async (event, user) => {
   try {
     const query = `INSERT INTO users (name , email , password) VALUES (?,?,?)`;
@@ -68,27 +68,35 @@ ipcMain.handle("register", async (event, user) => {
   }
 });
 
-ipcMain.handle('get-users' , async (event , user)=>{
+ipcMain.handle("get-users", async (event, user) => {
   try {
-    const query = `SELECT * FROM users WHERE email = ?`
-    const User = db.prepare(query).get(user.email)
+    const query = `SELECT * FROM users WHERE email = ?`;
+    const User = db.prepare(query).get(user.email);
 
     return {
-      success : true,
-      data : User
-    }
+      success: true,
+      data: User,
+    };
   } catch (error) {
-      return {
-        success : false ,
-        error : error.message
-      }
+    return {
+      success: false,
+      error: error.message,
+    };
   }
-})
+});
 
 ipcMain.handle("login", async (event, user) => {
   try {
     const query = `SELECT * FROM users WHERE email = ? AND password = ?`;
     const data = db.prepare(query).get(user.email, user.password);
+
+    if (!data) {
+      return {
+        success: false,
+        error: "User not found",
+      };
+    } 
+
     return {
       success: true,
       data: data,
@@ -123,7 +131,7 @@ ipcMain.handle("add-note", async (event, note) => {
 
 ipcMain.handle("get-notes", async (event, user) => {
   try {
-    const query = `SELECT * FROM notes WHERE user_id = ? AND (recycle != 'bin' OR recycle IS NULL);`;
+    const query = `SELECT * FROM notes WHERE user_id = ? `;
     const getdata = db.prepare(query).all(user.user_id);
     return {
       success: true,
@@ -292,68 +300,64 @@ ipcMain.handle("get-recycle", async (event, notes) => {
   }
 });
 
-ipcMain.handle('recover' , async (event , notes)=>{
+ipcMain.handle("recover", async (event, notes) => {
   try {
-    const query = `UPDATE Notes SET recycle = 'recover' WHERE id = ?`
-    const recover = db.prepare(query).run(notes.id)
+    const query = `UPDATE Notes SET recycle = 'recover' WHERE id = ?`;
+    const recover = db.prepare(query).run(notes.id);
 
     return {
-      success : true ,
-      recover : recover.changes
-    }
+      success: true,
+      recover: recover.changes,
+    };
   } catch (error) {
     return {
-      success : false ,
-      error : error.message
-    }
+      success: false,
+      error: error.message,
+    };
   }
-})
+});
 
-ipcMain.handle('recycle-multitple' , async (event , ids)=>{
+ipcMain.handle("recycle-multitple", async (event, ids) => {
   if (!ids || ids.length === 0) {
-      return { success: false, error: "No IDs provided" };
-    }
+    return { success: false, error: "No IDs provided" };
+  }
   try {
-
-    const placeholders = ids.map(()=> '?').join(',')
-    const query = `UPDATE Notes SET recycle = 'bin' WHERE id IN (${placeholders})`  
-    const recycleMultiple = db.prepare(query).run(...ids)
+    const placeholders = ids.map(() => "?").join(",");
+    const query = `UPDATE Notes SET recycle = 'bin' WHERE id IN (${placeholders})`;
+    const recycleMultiple = db.prepare(query).run(...ids);
 
     return {
-      success : true,
-      recycle : recycleMultiple.changes
-    }
+      success: true,
+      recycle: recycleMultiple.changes,
+    };
   } catch (error) {
     return {
-      success : false ,
-      error : error.message
-    }
+      success: false,
+      error: error.message,
+    };
   }
-})
+});
 
-ipcMain.handle('recover-Multiple', async (event , notes)=>{
+ipcMain.handle("recover-Multiple", async (event, notes) => {
   if (!notes || notes.length === 0) {
-      return { success: false, error: "No IDs provided" };
-    }
+    return { success: false, error: "No IDs provided" };
+  }
   try {
-      const placeholders = notes.map(()=> '?').join(',')
-      const query = `UPDATE Notes SET recycle = 'recover' WHERE id IN (${placeholders})`
-      const recoverMultiple = db.prepare(query).run(...notes)
+    const placeholders = notes.map(() => "?").join(",");
+    const query = `UPDATE Notes SET recycle = 'recover' WHERE id IN (${placeholders})`;
+    const recoverMultiple = db.prepare(query).run(...notes);
 
-      return {
-        success : true,
-        recover : recoverMultiple.changes
-      }
-
+    return {
+      success: true,
+      recover: recoverMultiple.changes,
+    };
   } catch (error) {
     return {
-      success : false ,
-      error : error.message
-    }
+      success: false,
+      error: error.message,
+    };
   }
-})
-
-
+});
 
 app.whenReady().then(() => {
   createWindow();

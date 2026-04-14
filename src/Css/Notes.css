@@ -15,10 +15,11 @@
   border: none;
   cursor: pointer;
   transition: 0.2s;
-  padding: 12px 12px;
+  padding: 12px 10px;
   font-size: 16px;
   border-radius: 8px;
 }
+
 .notes-container {
   width: 100%;
   height: 100vh;
@@ -87,12 +88,19 @@
 .btn:hover {
   background-color: rgb(248, 248, 248);
 }
+.btn:focus {
+  background-color: rgb(248, 248, 248);
+}
 .active-all {
   background-color: #3b82f6;
   color: white;
 }
 .active-all:hover {
   background-color: #155dfc;
+}
+.active-all:focus {
+  background-color: #155dfc;
+  color: white;
 }
 .active-favourite {
   background-color: #f092c5;
@@ -101,12 +109,20 @@
 .active-favourite:hover {
   background-color: #fb64b6;
 }
+.active-favourite:focus {
+  background-color: #fb64b6;
+  color: white;
+}
 .active-recycle {
   background-color: #05df72;
   color: white;
 }
 .active-recycle:hover {
   background: oklch(72.3% 0.219 149.579);
+}
+.active-recycle:focus {
+  background: oklch(72.3% 0.219 149.579);
+  color: white;
 }
 .logout {
   margin-top: auto;
@@ -210,9 +226,14 @@
   position: relative;
   cursor: pointer;
   transition: 0.3s ease-in;
+  border: none;
+  text-align: start;
 }
 .data .note.selected {
   box-shadow: 0 0 0 2px #3b82f6;
+}
+.data .note:hover {
+  box-shadow: 0 0 0 2px #d3d9e2;
 }
 
 .data .note .title {
@@ -230,6 +251,7 @@
   overflow: hidden;
   display: -webkit-box;
   -webkit-box-orient: vertical;
+  line-clamp: auto;
   -webkit-line-clamp: 3;
 }
 .fnbtn {
@@ -238,14 +260,20 @@
   right: 12px;
   top: 7px;
   display: flex;
+  align-items: center;
   gap: 3px;
 }
-.fnbtn button {
-  padding-inline: 5px;
-  padding-block: 5px;
+.fnbtn span {
+  padding: 5px 7px;
   border-radius: 7px;
   color: white;
   transition: 0.3s ease-in;
+  border: none;
+  cursor: pointer;
+}
+.active-note {
+  border: 2px solid #3b82f6;
+  transform: scale(1.02);
 }
 .fnbtn .editbtn {
   background-color: oklch(62.3% 0.214 259.815);
