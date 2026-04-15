@@ -1,9 +1,10 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { CircleX, Pencil, Recycle, Star, Trash, Trash2 } from "lucide-react";
+import { CircleX, FileUp, Pencil, PrinterIcon, Recycle, Star, Trash, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
 import "../Css/Notes.css";
 import { useDispatch, useSelector } from "react-redux";
+import "../Css/Printlayout.css";
 import { logout } from "../redux/reducers/authReducer";
 import {
   deleteNote,
@@ -12,21 +13,25 @@ import {
   multipleDeleteNote,
   toggleFavourite,
 } from "../redux/reducers/notesReducer";
+import useKeyboard from "../hooks/keyboard";
 
 const Favourite = () => {
   const navigate = useNavigate();
+  const [print, setPrint] = useState(false);
+  const searchRef = useRef(null);
   const dispatch = useDispatch();
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState("Sorting");
+  const [selectedIndex, setSelectedIndex] = useState(0);
   let [user, setUser] = useState(null);
   const [edit, setEdit] = useState(true);
   const [selectedNotes, setSelectedNotes] = useState([]);
   const [showConfirm, setShowConfirm] = useState(false);
   const [deleteid, setDeleteid] = useState(null);
-  const notes = useSelector((state)=> state.note.notes)
-    const data = useMemo(()=>{
-      return notes.filter((note)=> note.like === 1)
-    },[notes])
+  const notes = useSelector((state) => state.note.notes);
+  const data = useMemo(() => {
+    return notes.filter((note) => note.like === 1);
+  }, [notes]);
 
   const userId = useSelector((state) => state.auth.user);
   useEffect(() => {
@@ -58,7 +63,7 @@ const Favourite = () => {
     try {
       const res = await window.api.deleteNote({ id: deleteid });
       if (res.success) {
-        dispatch(deleteNote({id : deleteid}))
+        dispatch(deleteNote({ id: deleteid }));
         console.log("success on delete");
       } else {
         console.log(res.error);
@@ -95,6 +100,14 @@ const Favourite = () => {
         return filterData;
     }
   }, [search, data, sort]);
+
+  useEffect(() => {
+    if (selectedIndex >= filteredData.length) {
+      setSelectedIndex(filteredData.length - 1);
+    }
+  }, [filteredData.length]);
+
+  const selectedNote = filteredData[selectedIndex];
 
   const handleFavourite = async (user_id, id) => {
     try {
@@ -145,7 +158,7 @@ const Favourite = () => {
       const res = await window.api.recycleMultiple(selectedNotes);
 
       if (res.success) {
-        dispatch(moveMultipleToRecycle(selectedNotes))
+        dispatch(moveMultipleToRecycle(selectedNotes));
         toast.success("Notes Moved to Recycle.");
         setSelectedNotes([]);
         setEdit(false);
@@ -167,7 +180,7 @@ const Favourite = () => {
         id: deleteid,
       });
       if (res.success) {
-        dispatch(moveToRecycle({id : deleteid}))
+        dispatch(moveToRecycle({ id: deleteid }));
         toast.success("Moved to Recycled Bin");
       }
     } catch (error) {
@@ -178,10 +191,136 @@ const Favourite = () => {
     setDeleteid(null);
   };
 
+  useKeyboard({
+    selectedNote,
+    selectedNotes,
+    filteredLength: filteredData.length,
+    edit,
+    searchRef,
+
+    actions: {
+      // 🔹 Navigation
+      onDown: () =>
+        setSelectedIndex((prev) => Math.min(prev + 1, filteredData.length - 1)),
+
+      onUp: () => setSelectedIndex((prev) => Math.max(prev - 1, 0)),
+
+      // 🔹 Selection
+      onToggleSelect: (id) => toggleSelect(id),
+
+      // 🔹 Global
+      onAdd: () => navigate("/add"),
+      onLogout: () => handleLogOut(),
+
+      onEnterEdit: () => {
+        setEdit(false);
+        setSelectedNotes([]);
+      },
+
+      onExitEdit: () => {
+        setEdit(true);
+        setSelectedNotes([]);
+      },
+
+      // 🔹 Single actions
+      onDeleteSingle: (id) => {
+        setDeleteid(id);
+        setShowConfirm(true);
+      },
+
+      onRecoverSingle: () => {}, // not needed
+
+      // 🔹 Multiple
+      onDeleteMultiple: () => {
+        setShowConfirm(true);
+      },
+
+      onRecoverMultiple: () => {},
+
+        onPrint: () => {
+        setPrint(true);
+      },
+
+      onConfirmPrint: () => {
+        handlePrint();
+      },
+
+      exportPdf: () => {
+        handlePrintPDF();
+      },
+      // 🔹 Escape
+      onEscape: () => {
+        setEdit(true);
+        setSelectedNotes([]);
+        setShowConfirm(false);
+      },
+      ClosePrintShow : ()=>{
+        setPrint(false)
+      },
+
+      onToggleFavourite: () => {
+        if (!selectedNote) return;
+
+        handleFavourite(selectedNote.user_id, selectedNote.id);
+      },
+
+      ToRecycle : () => {
+        navigate('/recycle')
+      },
+      ToAllNotes : () => {
+        navigate('/notes')
+      },
+    },
+  });
+
+  useEffect(() => {
+    if (!showConfirm) return;
+
+    const handleModalKeys = (e) => {
+      const key = e.key.toLowerCase();
+
+      if (key === "delete") {
+        e.preventDefault();
+        selectedNotes.length === 0 ? handleConfirmDelete() : multipleDelete();
+      }
+
+      if (key === "r") {
+        e.preventDefault();
+        selectedNotes.length === 0 ? handleRecycle() : handleMultipleRecycle();
+      }
+
+      if (key === "escape" || key === "c") {
+        e.preventDefault();
+        setShowConfirm(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleModalKeys);
+    return () => window.removeEventListener("keydown", handleModalKeys);
+  }, [showConfirm, selectedNotes]);
+
   const handleLogOut = () => {
     toast.success("LoggedOut successfully");
     navigate("/");
     dispatch(logout());
+  };
+
+  const printableData =
+    selectedNotes.length > 0
+      ? filteredData.filter((note) => selectedNotes.includes(note.id))
+      : filteredData;
+
+  const handlePrint = () => {
+    document.body.classList.add("printing");
+    window.api.print();
+
+    setTimeout(() => {
+      document.body.classList.remove("printing");
+    }, 1000);
+  };
+
+  const handlePrintPDF = async () => {
+    window.api.printPDF();
   };
 
   return (
@@ -264,6 +403,7 @@ const Favourite = () => {
               placeholder="Search notes..."
               className="search"
               onChange={(e) => setSearch(e.target.value)}
+              ref={searchRef}
             />
           </div>
         </div>
@@ -275,19 +415,23 @@ const Favourite = () => {
           </div>
         ) : (
           <div className="data">
-            {filteredData.map((note) => (
-              <div
+            {filteredData.map((note, index) => (
+              <button
                 key={note.id}
+                type="button"
                 onClick={() => !edit && toggleSelect(note.id)}
-                className={`note  ${selectedNotes.includes(note.id) ? "ring-2 ring-blue-500" : ""}`}
+                onKeyDown={(e) => e.preventDefault()}
+                className={`note ${selectedNotes.includes(note.id) ? "selected" : ""} ${index === selectedIndex ? "active-note" : ""}`}
               >
                 <input
                   type="checkbox"
                   checked={selectedNotes.includes(note.id)}
                   onChange={() => toggleSelect(note.id)}
+                  tabIndex={-1}
+                  onKeyDown={(e) => e.preventDefault()}
                   name=""
                   id=""
-                  className={edit ? "hidden" : "accent-blue-500 h-4 w-4"}
+                  className={edit ? "hidden" : "checked"}
                 />
                 {edit ? (
                   <div className="fnbtn">
@@ -322,7 +466,7 @@ const Favourite = () => {
                 <h3 className="title">{note.title}</h3>
 
                 <p className="content">{note.content}</p>
-              </div>
+              </button>
             ))}
           </div>
         )}
@@ -364,6 +508,45 @@ const Favourite = () => {
             </div>
           </div>
         </div>
+      )}
+        {print && (
+        <div className="print-overlay">
+    <div className="print-modal">
+
+      <div className="print-header-ui">
+        <h2>Print Preview</h2>
+
+        <div className="print-actions">
+          <button className="btn btn-green" onClick={handlePrint}>
+            <PrinterIcon stroke="white"/>
+          </button>
+
+          <button className="btn btn-orange" onClick={() => setPrint(false)}>
+            <CircleX stroke="white"/>
+          </button>
+
+          <button className="btn" onClick={handlePrintPDF}>
+            <FileUp stroke="white"/>
+          </button>
+        </div>
+      </div>
+
+      <div className="print-preview">
+        <div className="print-paper">
+          <h1 className="doc-title">My Notes</h1>
+          <p className="doc-date">{new Date().toLocaleString()}</p>
+
+          {printableData.map((note) => (
+            <div key={note.id} className="doc-note">
+              <h3>{note.title}</h3>
+              <p>{note.content}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+    </div>
+  </div>
       )}
     </div>
   );

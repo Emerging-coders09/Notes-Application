@@ -359,6 +359,32 @@ ipcMain.handle("recover-Multiple", async (event, notes) => {
   }
 });
 
+ipcMain.handle('print-page', async (event)=>{
+  const win = BrowserWindow.getFocusedWindow()
+
+  if(!win) return 
+
+  win.webContents.print({
+    silent : false ,
+    printBackground : true
+  })
+})
+
+ipcMain.handle('print-pdf', async (event)=>{
+  const win = BrowserWindow.getFocusedWindow()
+
+  if(!win) return
+
+  const data = await win.webContents.printToPDF({
+    printBackground : true
+  })
+
+  const fs = require('fs')
+  fs.writeFileSync('notes.pdf', data)
+
+  return true
+})
+
 app.whenReady().then(() => {
   createWindow();
 });

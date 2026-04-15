@@ -97,6 +97,7 @@
 }
 .active-all:hover {
   background-color: #155dfc;
+  color: white;
 }
 .active-all:focus {
   background-color: #155dfc;
@@ -108,6 +109,7 @@
 }
 .active-favourite:hover {
   background-color: #fb64b6;
+  color: white;
 }
 .active-favourite:focus {
   background-color: #fb64b6;
@@ -119,6 +121,7 @@
 }
 .active-recycle:hover {
   background: oklch(72.3% 0.219 149.579);
+  color: white;
 }
 .active-recycle:focus {
   background: oklch(72.3% 0.219 149.579);
@@ -235,7 +238,17 @@
 .data .note:hover {
   box-shadow: 0 0 0 2px #d3d9e2;
 }
-
+.data .note:focus {
+  box-shadow: 0 0 0 2px #d3d9e2;
+}
+.data input {
+  position: absolute;
+  top:5px;
+  left:5px;
+  width: 10px;
+  height: 10px;
+  border-radius: 25%;
+}
 .data .note .title {
   font-weight: 600;
   font-size: 18px;
@@ -272,7 +285,7 @@
   cursor: pointer;
 }
 .active-note {
-  border: 2px solid #3b82f6;
+  box-shadow: 0 0 0 2px #d3d9e2;
   transform: scale(1.02);
 }
 .fnbtn .editbtn {
@@ -353,6 +366,7 @@
   color: white;
   transition: 0.3s ease-in;
   cursor: pointer;
+  border: none;
 }
 
 .btn-red {
@@ -366,6 +380,12 @@
 }
 .btn-orange:hover {
   background-color: oklch(64.6% 0.222 41.116);
+}
+.btn-blue{
+  background-color: oklch(62.3% 0.214 259.815);
+}
+.btn-blue:hover{
+  background-color: #155dfc;
 }
 .btn-green {
 /* padding: 8px 20px; */

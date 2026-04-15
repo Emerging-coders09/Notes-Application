@@ -1,14 +1,11 @@
-import React, { useEffect, useMemo, useState } from "react";
-import {
-  CircleCheckBig,
-  CircleX,
-  Pencil,
-  Trash2,
-} from "lucide-react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { CircleCheckBig, CircleX, FileUp, Pencil, PrinterIcon, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
+import useKeyboard from "../hooks/keyboard";
 import { useNavigate } from "react-router-dom";
 import "../Css/Notes.css";
 import { useDispatch, useSelector } from "react-redux";
+import "../Css/Printlayout.css";
 import { logout } from "../redux/reducers/authReducer";
 import {
   deleteNote,
@@ -20,21 +17,23 @@ import {
 const Recycle = () => {
   const dispatch = useDispatch();
   const [search, setSearch] = useState("");
+    const [print, setPrint] = useState(false);
+  const searchRef = useRef(null);
   const [sort, setSort] = useState("Sorting");
   const [edit, setEdit] = useState(true);
+  const [selectedIndex, setSelectedIndex] = useState(0);
   const [selectedNotes, setSelectedNotes] = useState([]);
   const navigate = useNavigate();
   const user = useSelector((state) => state.auth.user);
-  const notes = useSelector((state)=> state.note.notes)
-  const data = useMemo(()=>{
-    return notes.filter((note)=> note.recycle === 'bin')
-  }, [notes])
+  const notes = useSelector((state) => state.note.notes);
+  const data = useMemo(() => {
+    return notes.filter((note) => note.recycle === "bin");
+  }, [notes]);
   useEffect(() => {
     if (user) {
-      console.log(notes)
+      console.log(notes);
     }
   }, [user]);
-
 
   const filteredData = useMemo(() => {
     let filterData = search.trim()
@@ -63,6 +62,11 @@ const Recycle = () => {
     }
   }, [search, data, sort]);
 
+  useEffect(() => {
+    if (selectedIndex >= filteredData.length) {
+      setSelectedIndex(filteredData.length - 1);
+    }
+  }, [filteredData.length]);
   const toggleSelect = (id) => {
     setSelectedNotes((prev) =>
       prev.includes(id)
@@ -88,32 +92,19 @@ const Recycle = () => {
     }
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     try {
-      dispatch(deleteNote({ id: id }));
+      const res = await window.api.deleteNote({ id });
 
-      toast.success("Note delete..");
-      data.filter((note) => note.id !== id);
-      DeleteData(id);
-    } catch (error) {
-      toast.error(error || "something wrong");
-    }
-  };
-
-  const DeleteData = async (id) => {
-    try {
-      const res = await window.api.deleteNote({ id: id });
       if (res.success) {
-        dispatch(deleteNote({ id: id }));
-        toast.success("Deleted Permantly");
+        dispatch(deleteNote({ id }));
+        toast.success("Deleted permanently");
       } else {
-        console.log(res.error);
+        toast.error(res.error);
       }
     } catch (error) {
-      console.error(error);
+      toast.error("Something went wrong");
     }
-    setShowConfirm(false);
-    setDeleteid(null);
   };
 
   const handleRecover = async (id) => {
@@ -146,11 +137,91 @@ const Recycle = () => {
       toast.error(error);
     }
   };
+  const selectedNote = filteredData[selectedIndex];
+
+  useKeyboard({
+    selectedNote,
+    selectedNotes,
+    filteredLength: filteredData.length,
+    edit,
+    searchRef,
+
+    actions: {
+      onDown: () =>
+        setSelectedIndex((prev) => Math.min(prev + 1, filteredData.length - 1)),
+
+      onUp: () => setSelectedIndex((prev) => Math.max(prev - 1, 0)),
+
+      onToggleSelect: (id) => toggleSelect(id),
+
+      onAdd: () => navigate("/add"),
+
+      onLogout: () => handleLogOut(),
+
+      onEnterEdit: () => setEdit(false),
+
+      onExitEdit: () => {
+        setEdit(true);
+        setSelectedNotes([]);
+      },
+
+      onDeleteSingle: (id) => handleDelete(id),
+
+      onRecoverSingle: (id) => handleRecover(id),
+
+      onDeleteMultiple: () => multipleDelete(),
+
+      onRecoverMultiple: () => multipleRecycle(),
+
+        onPrint: () => {
+        setPrint(true);
+      },
+
+      onConfirmPrint: () => {
+        handlePrint();
+      },
+
+      exportPdf: () => {
+        handlePrintPDF();
+      },
+      ClosePrintShow : ()=>{
+        setPrint(false)
+      },
+
+      onEscape: () => {
+        setEdit(true);
+        setSelectedNotes([]);
+      },
+      ToAllNotes : () => {
+        navigate('/notes')
+      },
+      ToFavourite : ()=> {
+        navigate('/favourite')
+      }
+    },
+  });
 
   const handleLogOut = () => {
     toast.success("LoggedOut successfully");
     navigate("/");
     dispatch(logout());
+  };
+  const printableData =
+    selectedNotes.length > 0
+      ? filteredData.filter((note) => selectedNotes.includes(note.id))
+      : filteredData;
+
+  const handlePrint = () => {
+    document.body.classList.add("printing");
+    window.api.print();
+
+    setTimeout(() => {
+      document.body.classList.remove("printing");
+    }, 1000);
+  };
+
+  const handlePrintPDF = async () => {
+    window.api.printPDF();
   };
 
   return (
@@ -242,6 +313,7 @@ const Recycle = () => {
               placeholder="Search notes..."
               className="search"
               onChange={(e) => setSearch(e.target.value)}
+              ref={searchRef}
             />
           </div>
         </div>
@@ -253,19 +325,23 @@ const Recycle = () => {
           </div>
         ) : (
           <div className="data">
-            {filteredData.map((note) => (
-              <div
+            {filteredData.map((note, index) => (
+              <button
                 key={note.id}
                 onClick={() => !edit && toggleSelect(note.id)}
-                className={`note  ${selectedNotes.includes(note.id) ? "selected" : ""}`}
+                type="button"
+                onKeyDown={(e) => e.preventDefault()}
+                className={`note ${selectedNotes.includes(note.id) ? "selected" : ""} ${index === selectedIndex ? "active-note" : ""}`}
               >
                 <input
                   type="checkbox"
+                  tabIndex={-1}
+                  onKeyDown={(e) => e.preventDefault()}
                   checked={selectedNotes.includes(note.id)}
                   onChange={() => toggleSelect(note.id)}
                   name=""
                   id=""
-                  className={edit ? "hidden" : "accent-blue-500 h-4 w-4"}
+                  className={edit ? "hidden" : "checked"}
                 />
                 {edit ? (
                   <div className="fnbtn">
@@ -287,10 +363,50 @@ const Recycle = () => {
                 <h3 className="title">{note.title}</h3>
 
                 <p className="content">{note.content}</p>
-              </div>
+              </button>
             ))}
           </div>
         )}
+        {print && (
+        <div className="print-overlay">
+          <div className="print-modal">
+            <div className="print-header-ui">
+              <h2>Print Preview</h2>
+
+              <div className="print-actions">
+                <button className="btn btn-green" onClick={handlePrint}>
+                  <PrinterIcon stroke="white" />
+                </button>
+
+                <button
+                  className="btn btn-orange"
+                  onClick={() => setPrint(false)}
+                >
+                  <CircleX stroke="white" />
+                </button>
+
+                <button className="btn" onClick={handlePrintPDF}>
+                  <FileUp stroke="white" />
+                </button>
+              </div>
+            </div>
+
+            <div className="print-preview">
+              <div className="print-paper">
+                <h1 className="doc-title">My Notes</h1>
+                <p className="doc-date">{new Date().toLocaleString()}</p>
+
+                {printableData.map((note) => (
+                  <div key={note.id} className="doc-note">
+                    <h3>{note.title}</h3>
+                    <p>{note.content}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       </div>
     </div>
   );
