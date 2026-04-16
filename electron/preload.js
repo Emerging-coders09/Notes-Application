@@ -19,6 +19,7 @@ contextBridge.exposeInMainWorld('api', {
     deactivate : (user)=> ipcRenderer.invoke('deactivate' , user),
     recycleMultiple : (ids)=> ipcRenderer.invoke('recycle-multitple', ids),
     recoverMultiple : (notes)=> ipcRenderer.invoke('recover-Multiple', notes),
-    print : ()=> ipcRenderer.invoke('print-page'),
+    print : (notes , user , size)=> ipcRenderer.send('print-page' , notes , user , size),
+    getPrintData : ()=> ipcRenderer.invoke('get-print-data'),
     printPDF : ()=> ipcRenderer.invoke('print-pdf')
 })

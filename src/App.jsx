@@ -1,5 +1,5 @@
 import React from 'react'
-import {  Route, Routes, BrowserRouter } from 'react-router-dom'
+import {  Route, Routes, BrowserRouter, HashRouter } from 'react-router-dom'
 import Login from './Pages/Login'
 import Sign from './Pages/Sign'
 import Add from './Pages/Add'
@@ -11,12 +11,13 @@ import Favourite from './Pages/Favourite'
 import Recycle from './Pages/Recycle'
 import ProtectedRoutes from './ProtectedRoutes'
 import "bootstrap/dist/css/bootstrap.min.css";
+import PrintLayour from './Pages/PrintLayour'
 
 const App = () => {
   return (
     <>
     <Toaster position="top-right" reverseOrder={false} />
-    <BrowserRouter>
+    <HashRouter>
       <Routes>
         <Route path='/' element={<Login />}/>
         <Route path='/sign'  element={<Sign />}/>
@@ -28,8 +29,9 @@ const App = () => {
         <Route path='/favourite' element={<Favourite />}/>
         <Route path='/recycle' element={<Recycle />}/>
         </Route>
+        <Route path='/print/:id' element={<PrintLayour />}/>
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
     </>
   )
 }

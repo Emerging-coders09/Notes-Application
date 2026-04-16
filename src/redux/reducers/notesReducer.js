@@ -5,6 +5,7 @@ const noteSlice = createSlice({
   initialState: {
     notes: [],
     error: null,
+    PrintNotes : []
   },
   reducers: {
     addNote: (state, action) => {
@@ -65,6 +66,9 @@ const noteSlice = createSlice({
                 note.recycle = 'recover'
             }
         })
+    },
+    PrintData : (state ,action)=>{
+      state.PrintNotes = action.payload
     }
   },
 });
@@ -79,6 +83,7 @@ export const {
   moveToRecycle,
   moveMultipleToRecycle,
   restoreFromRecycle,
-  multipeRestore
+  multipeRestore,
+  PrintData
 } = noteSlice.actions;
 export default noteSlice.reducer;

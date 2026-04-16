@@ -1,8 +1,9 @@
 import { app, BrowserWindow, ipcMain } from "electron";
 import path from "path";
-import { fileURLToPath } from "url";
+import { fileURLToPath, URL } from "url";
+import url from 'url'
 import Database from "better-sqlite3";
-import { error } from "console";
+import Printwindow from "./PrintLayout.js";
 let win;
 
 const __filename = fileURLToPath(import.meta.url);
@@ -20,9 +21,11 @@ const createWindow = () => {
   if (process.env.VITE_SERVER) {
     win.loadURL(process.env.VITE_SERVER);
   } else {
-    win.loadURL(`file://${path.join(__dirname, "../dist/index.html")}`);
+    win.loadFile(path.join(__dirname , '../dist/index.html'))
   }
 };
+
+
 const db = new Database("notes.db");
 db.pragma("journal_mode = WAL");
 
@@ -358,16 +361,28 @@ ipcMain.handle("recover-Multiple", async (event, notes) => {
     };
   }
 });
+let PrintData = {
+  notes : '',
+  user : '',
+  size : ''
+}
 
-ipcMain.handle('print-page', async (event)=>{
-  const win = BrowserWindow.getFocusedWindow()
+ipcMain.on('print-page', async (event , notes , user , Psize)=>{
+  // const win = BrowserWindow.getFocusedWindow()
 
-  if(!win) return 
+  // if(!win) return 
 
-  win.webContents.print({
-    silent : false ,
-    printBackground : true
-  })
+  
+  PrintData.notes = notes
+  PrintData.user = user
+  PrintData.size = Psize
+  console.log(PrintData)
+  Printwindow(Psize);
+ 
+})
+
+ipcMain.handle('get-print-data', async (event)=>{
+  return PrintData
 })
 
 ipcMain.handle('print-pdf', async (event)=>{

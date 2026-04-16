@@ -91,7 +91,7 @@ const Update = () => {
   };
 
   return (
-    <div className="container">
+    <div className="container-addupdate">
       <div className="box-container">
         <div className="header">
           <h1 className="">Update Note</h1>

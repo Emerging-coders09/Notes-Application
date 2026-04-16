@@ -73,7 +73,7 @@ const Add = () => {
   };
 
   return (
-    <div className="container">
+    <div className="container-addupdate">
       <form className="box-container" onSubmit={handleSave}>
         <div className="header">
           <h1 className="">New Note</h1>

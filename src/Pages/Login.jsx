@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import "../Css/Login&Sign.css";
 import { useDispatch } from "react-redux";
 import { login, LoginUser } from "../redux/reducers/authReducer";
 import "bootstrap/dist/css/bootstrap.min.css";
+import "../Css/Login&Sign.css";
 
 const Login = () => {
   const dispatch = useDispatch();
@@ -69,7 +69,8 @@ const Login = () => {
   };
 
   return (
-    <div className="container">
+    
+    <div className="container-login">
       <form className="box" onSubmit={handleLogin}>
         <div className="header">
           <h1 className="text-3xl font-semibold text-gray-800">NoteApp</h1>
@@ -88,7 +89,6 @@ const Login = () => {
                 onChange={(e) =>
                   setValues({ ...values, email: e.target.value })
                 }
-                onBlur={() => setTouched({ ...touched, email: true })}
               />
               <label htmlFor="email">Email</label>
             </div>
@@ -107,7 +107,6 @@ const Login = () => {
                 onChange={(e) =>
                   setValues({ ...values, password: e.target.value })
                 }
-                onBlur={() => setTouched({ ...touched, password: true })}
               />
               <label htmlFor="password">Password</label>
             </div>

@@ -30,6 +30,7 @@ import useKeyboard from "../hooks/keyboard";
 const Notes = () => {
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState("Sorting");
+  const [Psize , setPsize] = useState("A4")
   const navigate = useNavigate();
   const [edit, setEdit] = useState(true);
   const [print, setPrint] = useState(false);
@@ -267,20 +268,21 @@ const Notes = () => {
         setShowConfirm(false);
       },
       onPrint: () => {
-        setPrint(true);
+        // setPrint(true);
+        if(printableData.length === 0) return toast.error("Please select Notes to Print")
+        handlePrint()
+        
       },
 
-      onConfirmPrint: () => {
-        handlePrint();
-      },
+      // onConfirmPrint: () => {
+      //   handlePrint();
+      // },
 
-      exportPdf: () => {
-        handlePrintPDF();
-      },
+      // exportPdf: () => {
+      //   handlePrintPDF();
+      // },
 
-      ClosePrintShow : ()=>{
-        setPrint(false)
-      },
+     
 
       onToggleFavourite: () => {
         if (!selectedNote) return;
@@ -296,7 +298,11 @@ const Notes = () => {
         navigate('/recycle')
       },
       ToFavourite : ()=> {
-        navigate('/favourite')
+        navigate('/favourite')  
+      },
+
+      ToUpdateNote : ()=>{
+        navigate(`/update/${selectedNote.id}`)
       }
 
 
@@ -309,7 +315,7 @@ const Notes = () => {
     const handleModalKeys = (e) => {
       const key = e.key.toLowerCase();
 
-      if (key === "y") {
+      if (key === "delete") {
         e.preventDefault();
         selectedNotes.length === 0 ? handleConfirmDelete() : multipleDelete();
       }
@@ -334,15 +340,10 @@ const Notes = () => {
   const printableData =
     selectedNotes.length > 0
       ? filteredData.filter((note) => selectedNotes.includes(note.id))
-      : filteredData;
+      : [];
 
   const handlePrint = () => {
-    document.body.classList.add("printing");
-    window.api.print();
-
-    setTimeout(() => {
-      document.body.classList.remove("printing");
-    }, 1000);
+      window.api.print(printableData , userId , Psize);
   };
 
   const handlePrintPDF = async () => {
@@ -429,11 +430,20 @@ const Notes = () => {
                   <Trash2 size={20} stroke="white" />
                 </button>
                 <button
-                  onClick={() => setPrint(true)}
+                  onClick={() => handlePrint()}
                   className="button btn-green"
                 >
                   <Printer stroke="white" />
                 </button>
+                <div className="sortselect">
+
+                <select name="" id="" className="select" value={Psize} onChange={(e)=> setPsize(e.target.value)}>
+                  <option value="A4">A4</option>
+                  <option value="3-inch">3-inch</option>
+                  <option value="2-inch">2-inch</option>
+                </select>
+                <div className="arrow">▼</div>
+                </div>
               </div>
             )}
 
@@ -502,7 +512,7 @@ const Notes = () => {
                   </div>
                 ) : null}
 
-                <h3 className="title">{note.title}</h3>
+                <h3 className={`title ${index === selectedIndex ? 'underline' : ''}`}>{note.title}</h3>
 
                 <p className="content">{note.content}</p>
               </button>
@@ -548,46 +558,7 @@ const Notes = () => {
           </div>
         </div>
       )}
-      {print && (
-        <div className="print-overlay">
-          <div className="print-modal">
-            <div className="print-header-ui">
-              <h2>Print Preview</h2>
-
-              <div className="print-actions">
-                <button className="btn btn-blue" onClick={handlePrint}>
-                  <PrinterIcon stroke="white" />
-                </button>
-
-                <button
-                  className="btn btn-orange"
-                  onClick={() => setPrint(false)}
-                >
-                  <CircleX stroke="white" />
-                </button>
-
-                <button className="btn btn-green" onClick={handlePrintPDF}>
-                  <FileUp stroke="white" />
-                </button>
-              </div>
-            </div>
-
-            <div className="print-preview">
-              <div className="print-paper">
-                <h1 className="doc-title">My Notes</h1>
-                <p className="doc-date">{new Date().toLocaleString()}</p>
-
-                {printableData.map((note) => (
-                  <div key={note.id} className="doc-note">
-                    <h3>{note.title}</h3>
-                    <p>{note.content}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      
     </div>
   );
 };

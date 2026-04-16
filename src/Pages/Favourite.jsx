@@ -1,6 +1,16 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { CircleX, FileUp, Pencil, PrinterIcon, Recycle, Star, Trash, Trash2 } from "lucide-react";
+import {
+  CircleX,
+  FileUp,
+  Pencil,
+  Printer,
+  PrinterIcon,
+  Recycle,
+  Star,
+  Trash,
+  Trash2,
+} from "lucide-react";
 import toast from "react-hot-toast";
 import "../Css/Notes.css";
 import { useDispatch, useSelector } from "react-redux";
@@ -236,26 +246,27 @@ const Favourite = () => {
       },
 
       onRecoverMultiple: () => {},
+      onEscape: () => {
+        setEdit(true);
+        setSelectedNotes([]);
+        setShowConfirm(false);
+      },
 
-        onPrint: () => {
-        setPrint(true);
+      onPrint: () => {
+        if(printableData.length === 0) return toast.error("Please select Notes to Print")
+        handlePrint();
       },
 
       onConfirmPrint: () => {
-        handlePrint();
+        
       },
 
       exportPdf: () => {
         handlePrintPDF();
       },
       // 🔹 Escape
-      onEscape: () => {
-        setEdit(true);
-        setSelectedNotes([]);
-        setShowConfirm(false);
-      },
-      ClosePrintShow : ()=>{
-        setPrint(false)
+      ClosePrintShow: () => {
+        setPrint(false);
       },
 
       onToggleFavourite: () => {
@@ -264,12 +275,15 @@ const Favourite = () => {
         handleFavourite(selectedNote.user_id, selectedNote.id);
       },
 
-      ToRecycle : () => {
-        navigate('/recycle')
+      ToRecycle: () => {
+        navigate("/recycle");
       },
-      ToAllNotes : () => {
-        navigate('/notes')
+      ToAllNotes: () => {
+        navigate("/notes");
       },
+       ToUpdateNote : ()=>{
+        navigate(`/update/${selectedNote.id}`)
+      }
     },
   });
 
@@ -308,15 +322,17 @@ const Favourite = () => {
   const printableData =
     selectedNotes.length > 0
       ? filteredData.filter((note) => selectedNotes.includes(note.id))
-      : filteredData;
+      : [];
 
   const handlePrint = () => {
-    document.body.classList.add("printing");
-    window.api.print();
+    // document.body.classList.add("printing");
+    // window.api.print();
 
-    setTimeout(() => {
-      document.body.classList.remove("printing");
-    }, 1000);
+    // setTimeout(() => {
+    //   document.body.classList.remove("printing");
+    // }, 1000);
+    if(printableData.length === 0) return toast.error("Please select Notes to Print")
+    window.api.print(printableData , userId);
   };
 
   const handlePrintPDF = async () => {
@@ -394,6 +410,12 @@ const Favourite = () => {
                 </button>
                 <button className="button btn-red">
                   <Trash2 size={20} stroke="white" onClick={handleDelete} />
+                </button>
+                <button
+                  onClick={() => setPrint(true)}
+                  className="button btn-green"
+                >
+                  <Printer stroke="white" />
                 </button>
               </div>
             )}
@@ -509,45 +531,7 @@ const Favourite = () => {
           </div>
         </div>
       )}
-        {print && (
-        <div className="print-overlay">
-    <div className="print-modal">
-
-      <div className="print-header-ui">
-        <h2>Print Preview</h2>
-
-        <div className="print-actions">
-          <button className="btn btn-green" onClick={handlePrint}>
-            <PrinterIcon stroke="white"/>
-          </button>
-
-          <button className="btn btn-orange" onClick={() => setPrint(false)}>
-            <CircleX stroke="white"/>
-          </button>
-
-          <button className="btn" onClick={handlePrintPDF}>
-            <FileUp stroke="white"/>
-          </button>
-        </div>
-      </div>
-
-      <div className="print-preview">
-        <div className="print-paper">
-          <h1 className="doc-title">My Notes</h1>
-          <p className="doc-date">{new Date().toLocaleString()}</p>
-
-          {printableData.map((note) => (
-            <div key={note.id} className="doc-note">
-              <h3>{note.title}</h3>
-              <p>{note.content}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-    </div>
-  </div>
-      )}
+      
     </div>
   );
 };

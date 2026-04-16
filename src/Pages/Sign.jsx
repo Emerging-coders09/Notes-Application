@@ -105,7 +105,7 @@ const Sign = () => {
   };
 
   return (
-    <form className="container" onSubmit={handleRegister}>
+    <form className="container-login" onSubmit={handleRegister}>
       <div className="box">
         <div className="header">
           <h1 className="">Create Account</h1>
@@ -122,7 +122,6 @@ const Sign = () => {
                 id="name"
                 placeholder="Name"
                 onChange={(e) => setValues({ ...values, name: e.target.value })}
-                onBlur={() => setTouched({ ...touched, name: true })}
               />
               <label htmlFor="name">Name</label>
             </div>
@@ -141,7 +140,6 @@ const Sign = () => {
                 onChange={(e) =>
                   setValues({ ...values, email: e.target.value })
                 }
-                onBlur={() => setTouched({ ...touched, email: true })}
               />
               <label htmlFor="email">Email</label>
             </div>
@@ -160,7 +158,6 @@ const Sign = () => {
                 onChange={(e) =>
                   setValues({ ...values, password: e.target.value })
                 }
-                onBlur={() => setTouched({ ...touched, password: true })}
               />
               <label htmlFor="password">Password</label>
             </div>
@@ -179,7 +176,6 @@ const Sign = () => {
                 onChange={(e) =>
                   setValues({ ...values, confirmPassword: e.target.value })
                 }
-                onBlur={() => setTouched({ ...touched, confirmPassword: true })}
               />
               <label htmlFor="ConfirmPassword">ConfirmPassword</label>
             </div>

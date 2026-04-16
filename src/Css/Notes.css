@@ -32,6 +32,7 @@
   padding: 20px;
   display: flex;
   flex-direction: column;
+  background-color: white;
   box-shadow:
     rgba(0, 0, 0, 0.16) 0px 10px 36px 0px,
     rgba(0, 0, 0, 0.06) 0px 0px 0px 1px;
@@ -166,8 +167,7 @@
   background-color: oklch(62.3% 0.214 259.815);
   border-radius: 10px;
 }
-.top .left-top .edit:hover {
-}
+
 .search {
   padding: 10px;
   border-radius: 12px;
@@ -241,6 +241,12 @@
 .data .note:focus {
   box-shadow: 0 0 0 2px #d3d9e2;
 }
+.data .note .title {
+  font-weight: 600;
+  font-size: 18px;
+  color: #1e2939;
+  margin-bottom: 8px;
+}
 .data input {
   position: absolute;
   top:5px;
@@ -248,12 +254,6 @@
   width: 10px;
   height: 10px;
   border-radius: 25%;
-}
-.data .note .title {
-  font-weight: 600;
-  font-size: 18px;
-  color: #1e2939;
-  margin-bottom: 8px;
 }
 .data::-webkit-scrollbar {
   display: none;
@@ -287,6 +287,10 @@
 .active-note {
   box-shadow: 0 0 0 2px #d3d9e2;
   transform: scale(1.02);
+}
+.underline{
+  border-bottom: 1px solid #cbd1da;
+    width: fit-content;
 }
 .fnbtn .editbtn {
   background-color: oklch(62.3% 0.214 259.815);

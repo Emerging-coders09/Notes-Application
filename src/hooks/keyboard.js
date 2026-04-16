@@ -30,6 +30,11 @@ const useKeyboard = ({
         actions.onUp?.();
         return;
       }
+      if (key === 'enter' && selectedNote && !print){
+        e.preventDefault()
+        actions.ToUpdateNote?.();
+        return
+      }
 
       // =========================
       // 🔹 SPACE SELECT (ONLY IN EDIT MODE)
