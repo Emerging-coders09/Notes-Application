@@ -13,7 +13,6 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 import "../Css/Notes.css";
-import "../Css/Printlayout.css";
 import { useDispatch, useSelector } from "react-redux";
 import {
   clearAll,
@@ -30,7 +29,9 @@ import useKeyboard from "../hooks/keyboard";
 const Notes = () => {
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState("Sorting");
+
   const [Psize , setPsize] = useState("A4")
+  const sizeRef = useRef("A4");
   const navigate = useNavigate();
   const [edit, setEdit] = useState(true);
   const [print, setPrint] = useState(false);
@@ -342,15 +343,15 @@ const Notes = () => {
       ? filteredData.filter((note) => selectedNotes.includes(note.id))
       : [];
 
+  const handleChange = (e)=>{
+    setPsize(e.target.value)
+    sizeRef.current = e.target.value
+  }
+
   const handlePrint = () => {
-      window.api.print(printableData , userId , Psize);
+      window.api.print(printableData , userId , sizeRef.current);
   };
 
-  const handlePrintPDF = async () => {
-    await window.api.printPDF();
-    toast.success("Exported PDf")
-
-  };
 
   return (
     <div className="notes-container">
@@ -437,7 +438,7 @@ const Notes = () => {
                 </button>
                 <div className="sortselect">
 
-                <select name="" id="" className="select" value={Psize} onChange={(e)=> setPsize(e.target.value)}>
+                <select name="" id="" className="select" value={Psize} onChange={handleChange}>
                   <option value="A4">A4</option>
                   <option value="3-inch">3-inch</option>
                   <option value="2-inch">2-inch</option>

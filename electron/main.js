@@ -1,9 +1,11 @@
 import { app, BrowserWindow, ipcMain } from "electron";
+
 import path from "path";
-import { fileURLToPath, URL } from "url";
-import url from 'url'
+import { fileURLToPath } from "url";
 import Database from "better-sqlite3";
 import Printwindow from "./PrintLayout.js";
+ import pkg from 'electron-pos-printer'
+ const { PosPrinter } = pkg
 let win;
 
 const __filename = fileURLToPath(import.meta.url);
@@ -368,15 +370,10 @@ let PrintData = {
 }
 
 ipcMain.on('print-page', async (event , notes , user , Psize)=>{
-  // const win = BrowserWindow.getFocusedWindow()
-
-  // if(!win) return 
-
   
   PrintData.notes = notes
   PrintData.user = user
   PrintData.size = Psize
-  console.log(PrintData)
   Printwindow(Psize);
  
 })
@@ -385,20 +382,27 @@ ipcMain.handle('get-print-data', async (event)=>{
   return PrintData
 })
 
-ipcMain.handle('print-pdf', async (event)=>{
-  const win = BrowserWindow.getFocusedWindow()
+ipcMain.on('print-Page', async (event , notes)=>{
+  // const data = JSON.parse(notes)
+  // try {
+  //   await PosPrinter.print(data , {
+  //     preview : false ,
+  //     silent : true ,
+  //     copies : 1,
+  //     printerName : "POS58 Printer(2)",
+  //     timeOutPerLine : 400 ,
+  //     pageSize : {
+  //       width : 288,
+  //       height : 800,
+  //     }
+  //   })
+  //   console.log("Printed")
+  // } catch (error) {
+  //   console.log("Print failed :", error)
+  // }
+})  
 
-  if(!win) return
 
-  const data = await win.webContents.printToPDF({
-    printBackground : true
-  })
-
-  const fs = require('fs')
-  fs.writeFileSync('notes.pdf', data)
-
-  return true
-})
 
 app.whenReady().then(() => {
   createWindow();

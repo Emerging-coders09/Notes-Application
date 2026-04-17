@@ -14,7 +14,6 @@ import {
 import toast from "react-hot-toast";
 import "../Css/Notes.css";
 import { useDispatch, useSelector } from "react-redux";
-import "../Css/Printlayout.css";
 import { logout } from "../redux/reducers/authReducer";
 import {
   deleteNote,
@@ -27,6 +26,8 @@ import useKeyboard from "../hooks/keyboard";
 
 const Favourite = () => {
   const navigate = useNavigate();
+    const [Psize , setPsize] = useState("A4")
+    const sizeRef = useRef("A4");
   const [print, setPrint] = useState(false);
   const searchRef = useRef(null);
   const dispatch = useDispatch();
@@ -324,19 +325,13 @@ const Favourite = () => {
       ? filteredData.filter((note) => selectedNotes.includes(note.id))
       : [];
 
+  const handleChange = (e)=>{
+    setPsize(e.target.value)
+    sizeRef.current = e.target.value
+  }
+
   const handlePrint = () => {
-    // document.body.classList.add("printing");
-    // window.api.print();
-
-    // setTimeout(() => {
-    //   document.body.classList.remove("printing");
-    // }, 1000);
-    if(printableData.length === 0) return toast.error("Please select Notes to Print")
-    window.api.print(printableData , userId);
-  };
-
-  const handlePrintPDF = async () => {
-    window.api.printPDF();
+      window.api.print(printableData , userId , sizeRef.current);
   };
 
   return (
@@ -417,6 +412,15 @@ const Favourite = () => {
                 >
                   <Printer stroke="white" />
                 </button>
+                 <div className="sortselect">
+
+                <select name="" id="" className="select" value={Psize} onChange={handleChange}>
+                  <option value="A4">A4</option>
+                  <option value="3-inch">3-inch</option>
+                  <option value="2-inch">2-inch</option>
+                </select>
+                <div className="arrow">▼</div>
+                </div>
               </div>
             )}
 

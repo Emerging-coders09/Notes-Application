@@ -5,7 +5,6 @@ import useKeyboard from "../hooks/keyboard";
 import { useNavigate } from "react-router-dom";
 import "../Css/Notes.css";
 import { useDispatch, useSelector } from "react-redux";
-import "../Css/Printlayout.css";
 import { logout } from "../redux/reducers/authReducer";
 import {
   deleteNote,
