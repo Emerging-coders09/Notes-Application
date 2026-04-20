@@ -1,16 +1,43 @@
-# React + Vite
+# 📝 Notes App (Electron + React + Redux)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A desktop note-taking application built with Electron and React, designed for fast local note management with printing support and a clean UI.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 🚀 Overview
 
-## React Compiler
+This app allows users to create, manage, and organize notes locally with a focus on speed and simplicity. It runs as a desktop application using Electron, making it lightweight and offline-first.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## ⚙️ Tech Stack
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- **Frontend:** React
+- **State Management:** Redux
+- **Desktop Framework:** Electron
+- **Database:** SQLite (local storage)
+- **Styling:** CSS / Bootstrap (if used)
+- **Other Tools:** Electron POS Printer / custom print handling
+
+---
+
+## ✨ Features
+
+- Create, edit, and delete notes
+- Mark notes as favorite
+- Recycle bin for deleted notes
+- Local data persistence (SQLite)
+- Keyboard shortcuts support
+- Print notes (A4 / thermal sizes like 2-inch, 3-inch)
+- Custom print layouts
+- Fast UI with optimized rendering
+
+---
+
+## 📦 Installation
+
+Clone the repository:
+
+```bash
+git clone https://github.com/Emerging-coders09/Notes-Application
+cd Notes-Application
