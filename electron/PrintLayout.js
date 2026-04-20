@@ -31,7 +31,7 @@ const Printwindow = (size) => {
   
           });
         }, 1000);
-      });
+      }); 
 
       win.once("ready-to-show", () => {
         win.show(); // NOW it becomes visible

@@ -174,5 +174,5 @@ body.print-3inch @page {
 }
 
 body.print-A4 @page {
-  size : A4 ;
+  size: A4;
 }
