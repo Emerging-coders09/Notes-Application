@@ -83,14 +83,15 @@ body {
 }
 
 /* 3-inch Print */
-.inch3-print-container {
+.inch2-print-container {
   width: 270px;
   height: auto;
   background: #fff;
-  padding: 3px ;
+  padding: 3px;
   /* padding: 3px; */
 }
-.print3-top , .print2-top {
+.print3-top,
+.print2-top {
   display: flex;
   justify-content: space-between;
   /* align-items: center; */
@@ -102,25 +103,26 @@ body {
 .print3-top p {
   font-size: 13px;
 }
-.inch3-print-data ,.inch2-print-data{
-    width: auto;
-    /* display: flex;
+.inch3-print-data,
+.inch2-print-data {
+  width: auto;
+  /* display: flex;
   flex-direction: column; */
 }
 .inch3-print-container h3 {
-    font-size: 17px;
-    color: black;
-    /* text-align: center; */
+  font-size: 17px;
+  color: black;
+  /* text-align: center; */
 }
 .inch3-print-container p {
-    font-size: 14px;
-    color: #666;
-    /* text-align: center; */
+  font-size: 14px;
+  color: #666;
+  /* text-align: center; */
 }
 
 /* 2-inch Size */
 
-.inch2-print-container{
+.inch2-print-container {
   width: 192px;
   height: auto;
   background: #fff;
@@ -133,33 +135,44 @@ body {
 .print2-top p {
   font-size: 11px;
 }
-.inch2-print-data{
+.inch2-print-data {
   gap: 14px;
 }
 
 .inch2-print-container h3 {
-    font-size: 15px;
-    color: black;
-    text-align: center;
+  font-size: 15px;
+  color: black;
+  text-align: center;
 }
 .inch2-print-container p {
-    font-size: 11px;
-    color: #666;
-    text-align: center;
+  font-size: 11px;
+  color: #666;
+  text-align: center;
 }
 
 @media print {
-  body {
+  body.print-2inch {
     width: 48mm;
     margin: 0;
     padding: 0;
   }
 
-  * {
-    box-sizing: border-box;
+  body.print-3inch {
+    width: 76mm;
+  }
+
+  body.print-A4 {
+    width: 210mm;
   }
 }
 @page {
-  size: 48mm auto;
   margin: 0;
+}
+
+body.print-3inch @page {
+  size: 76mm auto;
+}
+
+body.print-A4 @page {
+  size : A4 ;
 }

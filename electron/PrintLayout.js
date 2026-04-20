@@ -21,6 +21,18 @@ const Printwindow = (size) => {
       });
       win.loadURL(`http://localhost:5173/#/print/${size}`);
 
+         win.webContents.on("did-finish-load", async () => {
+
+        setTimeout(() => {
+          
+          win.webContents.print({
+            silent: false,
+            printBackground: true,
+  
+          });
+        }, 1000);
+      });
+
       win.once("ready-to-show", () => {
         win.show(); // NOW it becomes visible
       });
@@ -73,6 +85,18 @@ const Printwindow = (size) => {
         },
       });
       win.loadURL(`http://localhost:5173/#/print/${size}`);
+
+         win.webContents.on("did-finish-load", async () => {
+
+        setTimeout(() => {
+          
+          win.webContents.print({
+            silent: false,
+            printBackground: true,
+  
+          });
+        }, 1000);
+      });
 
       win.once("ready-to-show", () => {
         win.show(); // NOW it becomes visible
