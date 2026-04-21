@@ -70,7 +70,12 @@ const Add = () => {
     } catch (error) {
       toast.error("Something went wrong");
     }
-  };
+  }
+
+  const navigateNotes = ()=>{
+    navigate('/notes')
+  }
+
 
   return (
     <div className="container-addupdate">
@@ -78,7 +83,7 @@ const Add = () => {
         <div className="header">
           <h1 className="">New Note</h1>
 
-          <button onClick={() => navigate("/notes")} className="">
+          <button onClick={navigateNotes} className="">
             <ArrowLeft size={16} />
             Back
           </button>

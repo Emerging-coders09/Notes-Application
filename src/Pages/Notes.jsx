@@ -30,7 +30,7 @@ const Notes = () => {
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState("Sorting");
 
-  const [Psize , setPsize] = useState("A4")
+  const [Psize, setPsize] = useState("A4");
   const sizeRef = useRef("A4");
   const navigate = useNavigate();
   const [edit, setEdit] = useState(true);
@@ -269,21 +269,10 @@ const Notes = () => {
         setShowConfirm(false);
       },
       onPrint: () => {
-        // setPrint(true);
-        if(printableData.length === 0) return toast.error("Please select Notes to Print")
-        handlePrint()
-        
+        if (printableData.length === 0)
+          return toast.error("Please select Notes to Print");
+        handlePrint();
       },
-
-      // onConfirmPrint: () => {
-      //   handlePrint();
-      // },
-
-      // exportPdf: () => {
-      //   handlePrintPDF();
-      // },
-
-     
 
       onToggleFavourite: () => {
         if (!selectedNote) return;
@@ -295,18 +284,16 @@ const Notes = () => {
         );
       },
 
-      ToRecycle : () => {
-        navigate('/recycle')
+      ToRecycle: () => {
+        navigate("/recycle");
       },
-      ToFavourite : ()=> {
-        navigate('/favourite')  
+      ToFavourite: () => {
+        navigate("/favourite");
       },
 
-      ToUpdateNote : ()=>{
-        navigate(`/update/${selectedNote.id}`)
-      }
-
-
+      ToUpdateNote: () => {
+        navigate(`/update/${selectedNote.id}`);
+      },
     },
   });
 
@@ -325,13 +312,11 @@ const Notes = () => {
         e.preventDefault();
         selectedNotes.length === 0 ? handleRecycle() : handleMultipleRecycle();
       }
-      
+
       if (key === "escape") {
         e.preventDefault();
-        setShowConfirm(false)
+        setShowConfirm(false);
       }
-      
-      
     };
 
     window.addEventListener("keydown", handleModalKeys);
@@ -343,15 +328,42 @@ const Notes = () => {
       ? filteredData.filter((note) => selectedNotes.includes(note.id))
       : [];
 
-  const handleChange = (e)=>{
-    setPsize(e.target.value)
-    sizeRef.current = e.target.value
-  }
-
-  const handlePrint = () => {
-      window.api.print(printableData , userId , sizeRef.current);
+  const handleChange = (e) => {
+    setPsize(e.target.value);
+    sizeRef.current = e.target.value;
   };
 
+  const handlePrint = () => {
+    window.api.print(printableData, userId, sizeRef.current);
+  };
+
+  
+  const navigateFavourite = ()=>{
+    navigate('/favourite')
+  }
+
+  const navigateAdd = ()=>{
+    navigate('/add')
+  }
+  const navigateRecycle = ()=>{
+    navigate('/recycle')
+  }
+  const navigateUpdate = (id)=>{
+    navigate(`/update${id}`)
+  }
+  
+
+  const setEditFalse = ()=>{
+    setEdit(false);
+    setSelectedNotes([]);
+  }
+  const setEditTrue = ()=>{
+    setEdit(true);
+    setSelectedNotes([]);
+  }
+  const showConfirmFalse = ()=>{
+    setShowConfirm(false)
+  }
 
   return (
     <div className="notes-container">
@@ -363,7 +375,7 @@ const Notes = () => {
           <span className="">{userId?.name || "User"}</span>
         </div>
 
-        <button className="Addbtn button" onClick={() => navigate("/add")}>
+        <button className="Addbtn button" onClick={navigateAdd}>
           + Add Note
         </button>
 
@@ -371,11 +383,11 @@ const Notes = () => {
           <button className="button btn active-all">All Notes</button>
           <button
             className=" button btn"
-            onClick={() => navigate("/favourite")}
+            onClick={navigateFavourite}
           >
             Favorites
           </button>
-          <button className=" button btn" onClick={() => navigate("/recycle")}>
+          <button className=" button btn" onClick={navigateRecycle}>
             Recycle Bin
           </button>
         </div>
@@ -394,10 +406,7 @@ const Notes = () => {
               <div className="left-top">
                 <button
                   className="edit button"
-                  onClick={() => {
-                    setEdit(false);
-                    setSelectedNotes([]);
-                  }}
+                  onClick={setEditFalse}
                 >
                   <Pencil size={20} stroke="white" />
                 </button>
@@ -420,10 +429,7 @@ const Notes = () => {
               <div className="left-top">
                 <button
                   className="button btn-orange"
-                  onClick={() => {
-                    setEdit(true);
-                    setSelectedNotes([]);
-                  }}
+                  onClick={setEditTrue}
                 >
                   <CircleX size={20} stroke="white" />
                 </button>
@@ -431,19 +437,24 @@ const Notes = () => {
                   <Trash2 size={20} stroke="white" />
                 </button>
                 <button
-                  onClick={() => handlePrint()}
+                  onClick={handlePrint}
                   className="button btn-green"
                 >
                   <Printer stroke="white" />
                 </button>
                 <div className="sortselect">
-
-                <select name="" id="" className="select" value={Psize} onChange={handleChange}>
-                  <option value="A4">A4</option>
-                  <option value="3-inch">3-inch</option>
-                  <option value="2-inch">2-inch</option>
-                </select>
-                <div className="arrow">▼</div>
+                  <select
+                    name=""
+                    id=""
+                    className="select"
+                    value={Psize}
+                    onChange={handleChange}
+                  >
+                    <option value="A4">A4</option>
+                    <option value="3-inch">3-inch</option>
+                    <option value="2-inch">2-inch</option>
+                  </select>
+                  <div className="arrow">▼</div>
                 </div>
               </div>
             )}
@@ -487,7 +498,7 @@ const Notes = () => {
                   <div className="fnbtn">
                     <span
                       className="ftnbutton editbtn"
-                      onClick={() => navigate(`/update/${note.id}`)}
+                      onClick={() => navigateUpdate(note.id)}
                     >
                       <Pencil size={16} />
                     </span>
@@ -513,7 +524,11 @@ const Notes = () => {
                   </div>
                 ) : null}
 
-                <h3 className={`title ${index === selectedIndex ? 'underline' : ''}`}>{note.title}</h3>
+                <h3
+                  className={`title ${index === selectedIndex ? "underline" : ""}`}
+                >
+                  {note.title}
+                </h3>
 
                 <p className="content">{note.content}</p>
               </button>
@@ -529,7 +544,7 @@ const Notes = () => {
 
             <div className=" modal-box-1">
               <button
-                onClick={() => setShowConfirm(false)}
+                onClick={showConfirmFalse}
                 className="btn-orange  modal-btn"
               >
                 <CircleX />
@@ -559,7 +574,6 @@ const Notes = () => {
           </div>
         </div>
       )}
-      
     </div>
   );
 };

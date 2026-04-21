@@ -104,6 +104,10 @@ const Sign = () => {
     }
   };
 
+  const navigateLogin = ()=>{
+    navigate("/")
+  }
+
   return (
     <form className="container-login" onSubmit={handleRegister}>
       <div className="box">
@@ -191,7 +195,7 @@ const Sign = () => {
 
         <p className="footer">
           Already have an account?
-          <button className="" onClick={() => navigate("/")}>
+          <button className="" onClick={navigateLogin}>
             Log in
           </button>
         </p>

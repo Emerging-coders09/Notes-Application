@@ -68,6 +68,10 @@ const Login = () => {
     }
   };
 
+  const navigateSign = ()=>{
+    navigate("/sign")
+  }
+
   return (
     
     <div className="container-login">
@@ -125,7 +129,7 @@ const Login = () => {
           Don’t have an account?{" "}
           <button
             className="text-blue-500 cursor-pointer"
-            onClick={() => navigate("/sign")}
+            onClick={navigateSign}
           >
             Sign up
           </button>

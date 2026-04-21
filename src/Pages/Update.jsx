@@ -90,13 +90,17 @@ const Update = () => {
     }
   };
 
+  const navigateNotes = ()=>{
+    navigate('/notes')
+  }
+
   return (
     <div className="container-addupdate">
       <div className="box-container">
         <div className="header">
           <h1 className="">Update Note</h1>
 
-          <button className="" onClick={() => navigate("/notes")}>
+          <button className="" onClick={navigateNotes}>
             Cancel
           </button>
         </div>

@@ -16,7 +16,6 @@ import {
 const Recycle = () => {
   const dispatch = useDispatch();
   const [search, setSearch] = useState("");
-    const [print, setPrint] = useState(false);
   const searchRef = useRef(null);
   const [sort, setSort] = useState("Sorting");
   const [edit, setEdit] = useState(true);
@@ -172,9 +171,7 @@ const Recycle = () => {
 
       onRecoverMultiple: () => multipleRecycle(),
 
-        onPrint: () => {
-        setPrint(true);
-      },
+        
 
       onConfirmPrint: () => {
         handlePrint();
@@ -183,9 +180,7 @@ const Recycle = () => {
       exportPdf: () => {
         handlePrintPDF();
       },
-      ClosePrintShow : ()=>{
-        setPrint(false)
-      },
+     
 
       onEscape: () => {
         setEdit(true);
@@ -221,7 +216,31 @@ const Recycle = () => {
 
   const handlePrintPDF = async () => {
     window.api.printPDF();
-  };
+  }
+
+   const navigateFavourite = ()=>{
+    navigate('/favourite')
+  }
+
+  const navigateAdd = ()=>{
+    navigate('/add')
+  }
+  const navigateNote = ()=>{
+    navigate('/notes')
+  }
+  const navigateUpdate = (id)=>{
+    navigate(`/update${id}`)
+  }
+  
+
+  const setEditFalse = ()=>{
+    setEdit(false);
+    setSelectedNotes([]);
+  }
+  const setEditTrue = ()=>{
+    setEdit(true);
+    setSelectedNotes([]);
+  }
 
   return (
     <div className="notes-container">
@@ -233,20 +252,19 @@ const Recycle = () => {
           <span className="">{user?.name || "User"}</span>
         </div>
 
-        <button className="button Addbtn" onClick={() => navigate("/add")}>
+        <button className="button Addbtn" onClick={navigateAdd}>
           + Add Note
         </button>
 
         <div className="section">
-          <button className="button btn" onClick={() => navigate("/notes")}>
+          <button className="button btn" onClick={navigateNote}>
             All Notes
           </button>
-          <button className="button btn" onClick={() => navigate("/favourite")}>
+          <button className="button btn" onClick={navigateFavourite}>
             Favorites
           </button>
           <button
             className="button btn active-recycle  "
-            onClick={() => navigate("/recycle")}
           >
             Recycle Bin
           </button>
@@ -265,10 +283,7 @@ const Recycle = () => {
               <div className="left-top">
                 <button
                   className="edit button"
-                  onClick={() => {
-                    setEdit(false);
-                    setSelectedNotes([]);
-                  }}
+                  onClick={setEditFalse}
                 >
                   <Pencil size={20} stroke="white" />
                 </button>
@@ -291,10 +306,7 @@ const Recycle = () => {
               <div className="left-top">
                 <button
                   className="button btn-orange"
-                  onClick={() => {
-                    setEdit(true);
-                    setSelectedNotes([]);
-                  }}
+                  onClick={setEditTrue}
                 >
                   <CircleX size={20} stroke="white" />
                 </button>
@@ -366,46 +378,7 @@ const Recycle = () => {
             ))}
           </div>
         )}
-        {print && (
-        <div className="print-overlay">
-          <div className="print-modal">
-            <div className="print-header-ui">
-              <h2>Print Preview</h2>
-
-              <div className="print-actions">
-                <button className="btn btn-green" onClick={handlePrint}>
-                  <PrinterIcon stroke="white" />
-                </button>
-
-                <button
-                  className="btn btn-orange"
-                  onClick={() => setPrint(false)}
-                >
-                  <CircleX stroke="white" />
-                </button>
-
-                <button className="btn" onClick={handlePrintPDF}>
-                  <FileUp stroke="white" />
-                </button>
-              </div>
-            </div>
-
-            <div className="print-preview">
-              <div className="print-paper">
-                <h1 className="doc-title">My Notes</h1>
-                <p className="doc-date">{new Date().toLocaleString()}</p>
-
-                {printableData.map((note) => (
-                  <div key={note.id} className="doc-note">
-                    <h3>{note.title}</h3>
-                    <p>{note.content}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+       
       </div>
     </div>
   );

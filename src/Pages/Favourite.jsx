@@ -26,8 +26,8 @@ import useKeyboard from "../hooks/keyboard";
 
 const Favourite = () => {
   const navigate = useNavigate();
-    const [Psize , setPsize] = useState("A4")
-    const sizeRef = useRef("A4");
+  const [Psize, setPsize] = useState("A4");
+  const sizeRef = useRef("A4");
   const [print, setPrint] = useState(false);
   const searchRef = useRef(null);
   const dispatch = useDispatch();
@@ -254,13 +254,12 @@ const Favourite = () => {
       },
 
       onPrint: () => {
-        if(printableData.length === 0) return toast.error("Please select Notes to Print")
+        if (printableData.length === 0)
+          return toast.error("Please select Notes to Print");
         handlePrint();
       },
 
-      onConfirmPrint: () => {
-        
-      },
+      onConfirmPrint: () => {},
 
       exportPdf: () => {
         handlePrintPDF();
@@ -282,9 +281,9 @@ const Favourite = () => {
       ToAllNotes: () => {
         navigate("/notes");
       },
-       ToUpdateNote : ()=>{
-        navigate(`/update/${selectedNote.id}`)
-      }
+      ToUpdateNote: () => {
+        navigate(`/update/${selectedNote.id}`);
+      },
     },
   });
 
@@ -325,14 +324,41 @@ const Favourite = () => {
       ? filteredData.filter((note) => selectedNotes.includes(note.id))
       : [];
 
-  const handleChange = (e)=>{
-    setPsize(e.target.value)
-    sizeRef.current = e.target.value
-  }
+  const handleChange = (e) => {
+    setPsize(e.target.value);
+    sizeRef.current = e.target.value;
+  };
 
   const handlePrint = () => {
-      window.api.print(printableData , userId , sizeRef.current);
-  };
+    window.api.print(printableData, userId, sizeRef.current);
+  }
+
+  const navigateNotes = ()=>{
+    navigate('/notes')
+  }
+
+  const navigateAdd = ()=>{
+    navigate('/add')
+  }
+  const navigateRecycle = ()=>{
+    navigate('/recycle')
+  }
+  const navigateUpdate = (id)=>{
+    navigate(`/update${id}`)
+  }
+  
+
+  const setEditFalse = ()=>{
+    setEdit(false);
+    setSelectedNotes([]);
+  }
+  const setEditTrue = ()=>{
+    setEdit(true);
+    setSelectedNotes([]);
+  }
+  const showConfirmFalse = ()=>{
+    setShowConfirm(false)
+  }
 
   return (
     <div className="notes-container">
@@ -344,16 +370,16 @@ const Favourite = () => {
           <span className="">{user?.name || "User"}</span>
         </div>
 
-        <button className="Addbtn button" onClick={() => navigate("/add")}>
+        <button className="Addbtn button" onClick={navigateAdd}>
           + Add Note
         </button>
 
         <div className="section">
-          <button className="button btn" onClick={() => navigate("/notes")}>
+          <button className="button btn" onClick={navigateNotes}>
             All Notes
           </button>
           <button className="button btn active-favourite ">Favorites</button>
-          <button className="button btn" onClick={() => navigate("/recycle")}>
+          <button className="button btn" onClick={navigateRecycle}>
             Recycle Bin
           </button>
         </div>
@@ -370,10 +396,7 @@ const Favourite = () => {
               <div className="left-top">
                 <button
                   className="edit button"
-                  onClick={() => {
-                    setEdit(false);
-                    setSelectedNotes([]);
-                  }}
+                  onClick={setEditFalse}
                 >
                   <Pencil size={20} stroke="white" />
                 </button>
@@ -396,10 +419,7 @@ const Favourite = () => {
               <div className="left-top">
                 <button
                   className="button btn-orange"
-                  onClick={() => {
-                    setEdit(true);
-                    setSelectedNotes([]);
-                  }}
+                  onClick={setEditTrue}
                 >
                   <CircleX size={20} stroke="white" />
                 </button>
@@ -407,19 +427,24 @@ const Favourite = () => {
                   <Trash2 size={20} stroke="white" onClick={handleDelete} />
                 </button>
                 <button
-                  onClick={() => setPrint(true)}
+                  onClick={handlePrint}
                   className="button btn-green"
                 >
                   <Printer stroke="white" />
                 </button>
-                 <div className="sortselect">
-
-                <select name="" id="" className="select" value={Psize} onChange={handleChange}>
-                  <option value="A4">A4</option>
-                  <option value="3-inch">3-inch</option>
-                  <option value="2-inch">2-inch</option>
-                </select>
-                <div className="arrow">▼</div>
+                <div className="sortselect">
+                  <select
+                    name=""
+                    id=""
+                    className="select"
+                    value={Psize}
+                    onChange={handleChange}
+                  >
+                    <option value="A4">A4</option>
+                    <option value="3-inch">3-inch</option>
+                    <option value="2-inch">2-inch</option>
+                  </select>
+                  <div className="arrow">▼</div>
                 </div>
               </div>
             )}
@@ -463,7 +488,7 @@ const Favourite = () => {
                   <div className="fnbtn">
                     <span
                       className="button editbtn"
-                      onClick={() => navigate(`/update/${note.id}`)}
+                      onClick={() => navigateUpdate(note.id)}
                     >
                       <Pencil size={16} />
                     </span>
@@ -505,7 +530,7 @@ const Favourite = () => {
 
             <div className="modal-box-1">
               <button
-                onClick={() => setShowConfirm(false)}
+                onClick={showConfirmFalse}
                 className="btn-orange modal-btn"
               >
                 <CircleX />
@@ -535,7 +560,6 @@ const Favourite = () => {
           </div>
         </div>
       )}
-      
     </div>
   );
 };

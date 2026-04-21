@@ -382,25 +382,6 @@ ipcMain.handle('get-print-data', async (event)=>{
   return PrintData
 })
 
-ipcMain.on('print-Page', async (event , notes)=>{
-  // const data = JSON.parse(notes)
-  // try {
-  //   await PosPrinter.print(data , {
-  //     preview : false ,
-  //     silent : true ,
-  //     copies : 1,
-  //     printerName : "POS58 Printer(2)",
-  //     timeOutPerLine : 400 ,
-  //     pageSize : {
-  //       width : 288,
-  //       height : 800,
-  //     }
-  //   })
-  //   console.log("Printed")
-  // } catch (error) {
-  //   console.log("Print failed :", error)
-  // }
-})  
 
 
 
