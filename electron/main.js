@@ -4,24 +4,25 @@ import path from "path";
 import { fileURLToPath } from "url";
 import Database from "better-sqlite3";
 import Printwindow from "./PrintLayout.js";
- import pkg from 'electron-pos-printer'
- const { PosPrinter } = pkg
 let win;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const isDev = !app.isPackaged;
+
 const createWindow = () => {
   win = new BrowserWindow({
     width: 1400,
     height: 800,
+    icon : path.join(__dirname , '../assets/favicon.ico'),
     webPreferences: {
-      preload: path.join(__dirname, "../electron/preload.js"),
+      preload: path.join(__dirname, "preload.js"),
     },
   });
 
-  if (process.env.VITE_SERVER) {
-    win.loadURL(process.env.VITE_SERVER);
+  if (isDev) {
+    win.loadURL('http://localhost:5173');
   } else {
     win.loadFile(path.join(__dirname , '../dist/index.html'))
   }

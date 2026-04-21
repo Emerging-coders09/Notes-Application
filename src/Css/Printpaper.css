@@ -169,10 +169,10 @@ body {
   margin: 0;
 }
 
-body.print-3inch @page {
+/* body.print-3inch @page {
   size: 76mm auto;
 }
 
 body.print-A4 @page {
   size: A4;
-}
+} */
