@@ -105,28 +105,28 @@ const Update = () => {
           </button>
         </div>
 
-        <div className="space-y-5">
+        <div className="">
           <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1">
+            <label className="">
               Title
             </label>
             <input
               type="text"
               placeholder="Enter note title..."
-              className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className=""
               value={values.title}
               onChange={(e) => setValues({ ...values, title: e.target.value })}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1">
+            <label className="">
               Content
             </label>
             <textarea
               rows="6"
               placeholder="Write your note here..."
-              className="w-full border border-gray-300 rounded-xl px-4 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className=""
               onChange={(e) =>
                 setValues({ ...values, content: e.target.value })
               }

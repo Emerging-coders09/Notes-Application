@@ -80,6 +80,11 @@ const Sign = () => {
         confirmPassword: true,
       });
       return;
+    } else if(values.password.length < 6){
+      setTouched({
+        password : true
+      })
+      return;
     }
 
     try {

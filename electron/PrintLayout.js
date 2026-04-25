@@ -25,6 +25,8 @@ const Printwindow = (size) => {
       preload : path.join(__dirname , 'preload.js')
     }
   })
+
+   win.setMenu(null)
   if(isDev){
 
     win.loadURL(`http://localhost:5173/#/print/${size}`)

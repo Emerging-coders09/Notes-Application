@@ -349,7 +349,7 @@ const Notes = () => {
     navigate('/recycle')
   }
   const navigateUpdate = (id)=>{
-    navigate(`/update${id}`)
+    navigate(`/update/${id}`)
   }
   
 

@@ -15,12 +15,13 @@ const createWindow = () => {
   win = new BrowserWindow({
     width: 1400,
     height: 800,
+
     icon : path.join(__dirname , '../assets/favicon.ico'),
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
     },
   });
-
+  win.setMenu(null)
   if (isDev) {
     win.loadURL('http://localhost:5173');
   } else {
